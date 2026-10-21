@@ -1348,6 +1348,21 @@ export default function KnowledgeGraph({ onNodeClick }: KnowledgeGraphProps) {
         }`}
       />
 
+      {/* ─── Empty State Overlay ─────────────────────────────────── */}
+      {initialNodes.length === 0 && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none p-6 text-center z-10">
+          <div className="w-16 h-16 rounded-2xl bg-nexus-surface/90 border border-nexus-border flex items-center justify-center text-3xl mb-3 shadow-xl backdrop-blur-md">
+            🕸️
+          </div>
+          <h3 className="text-base font-bold text-nexus-text mb-1">
+            Tu Grafo de Conocimiento está listo
+          </h3>
+          <p className="text-xs text-nexus-text-muted max-w-sm">
+            A medida que crees proyectos, tareas, hábitos y enlaces con <span className="font-mono text-indigo-400">[[...]]</span>, verás aparecer sus nodos y conexiones en tiempo real.
+          </p>
+        </div>
+      )}
+
       {/* ─── Selected Edge Floating Action Card ────────────────── */}
       {selectedEdge && (
         <div className="absolute top-20 right-6 z-20 max-w-sm p-3.5 rounded-2xl bg-nexus-surface/95 backdrop-blur-md border border-nexus-border shadow-2xl space-y-2 text-xs">

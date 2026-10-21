@@ -108,44 +108,51 @@ const GraphView: React.FC = () => {
                   Clústeres por Proyecto
                 </h3>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {projects.map(project => {
-                    const projectTasks = tasks.filter(t => t.projectId === project.id);
+                {projects.length === 0 ? (
+                  <div className="p-12 text-center rounded-2xl bg-nexus-surface border border-dashed border-nexus-border">
+                    <p className="text-sm font-semibold text-nexus-text mb-1">No hay proyectos creados aún</p>
+                    <p className="text-xs text-nexus-text-muted">Crea un proyecto y tareas desde el menú lateral para visualizar sus clústeres y conexiones aquí.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {projects.map(project => {
+                      const projectTasks = tasks.filter(t => t.projectId === project.id);
 
-                    return (
-                      <div
-                        key={project.id}
-                        className="p-4 bg-nexus-surface-2/80 border border-nexus-border/80 backdrop-blur-md rounded-2xl space-y-3 shadow-sm hover:border-indigo-500/50 transition"
-                      >
-                        <div className="flex items-center gap-2">
-                          <span className="text-xl">{project.emoji}</span>
-                          <h4 className="text-sm font-bold text-nexus-text truncate">{project.name}</h4>
-                          <span className="ml-auto text-[11px] font-mono text-nexus-text-muted">
-                            {projectTasks.length} tareas
-                          </span>
-                        </div>
+                      return (
+                        <div
+                          key={project.id}
+                          className="p-4 bg-nexus-surface-2/80 border border-nexus-border/80 backdrop-blur-md rounded-2xl space-y-3 shadow-sm hover:border-indigo-500/50 transition"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="text-xl">{project.emoji}</span>
+                            <h4 className="text-sm font-bold text-nexus-text truncate">{project.name}</h4>
+                            <span className="ml-auto text-[11px] font-mono text-nexus-text-muted">
+                              {projectTasks.length} tareas
+                            </span>
+                          </div>
 
-                        {/* Connected task nodes */}
-                        <div className="flex flex-wrap gap-1.5 pt-1">
-                          {projectTasks.length === 0 ? (
-                            <span className="text-[11px] text-nexus-text-muted">Sin tareas enlazadas</span>
-                          ) : (
-                            projectTasks.map(t => (
-                              <button
-                                key={t.id}
-                                onClick={() => setSelectedTaskId(t.id)}
-                                className="px-2.5 py-1 bg-nexus-surface-3 hover:bg-indigo-600/25 border border-nexus-border hover:border-indigo-500 rounded-lg text-xs text-nexus-text transition-all truncate max-w-[200px] cursor-pointer"
-                                title={t.title}
-                              >
-                                {t.title}
-                              </button>
-                            ))
-                          )}
+                          {/* Connected task nodes */}
+                          <div className="flex flex-wrap gap-1.5 pt-1">
+                            {projectTasks.length === 0 ? (
+                              <span className="text-[11px] text-nexus-text-muted">Sin tareas enlazadas</span>
+                            ) : (
+                              projectTasks.map(t => (
+                                <button
+                                  key={t.id}
+                                  onClick={() => setSelectedTaskId(t.id)}
+                                  className="px-2.5 py-1 bg-nexus-surface-3 hover:bg-indigo-600/25 border border-nexus-border hover:border-indigo-500 rounded-lg text-xs text-nexus-text transition-all truncate max-w-[200px] cursor-pointer"
+                                  title={t.title}
+                                >
+                                  {t.title}
+                                </button>
+                              ))
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
               {/* Global WikiLinks & Standalone Tasks */}

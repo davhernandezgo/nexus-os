@@ -13,5 +13,17 @@ export default defineConfig({
   build: {
     target: 'es2020',
     sourcemap: false,
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-core': ['react', 'react-dom', 'react-router-dom', 'zustand'],
+          'vendor-motion': ['framer-motion'],
+          'vendor-icons': ['lucide-react'],
+          'vendor-utils': ['date-fns', 'uuid'],
+          'vendor-supabase': ['@supabase/supabase-js'],
+        },
+      },
+    },
   },
 });

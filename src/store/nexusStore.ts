@@ -646,7 +646,24 @@ export const useNexusStore = create<NexusStore>()(
     }),
     {
       name: 'nexus-os-store',
-      version: 1,
+      version: 2,
+      migrate: (persistedState: any, version: number) => {
+        if (version < 2) {
+          // Discard mock/preloaded demo data from earlier versions
+          return {
+            ...persistedState,
+            tasks: [],
+            projects: [],
+            habits: [],
+            expenses: [],
+            tripPlans: [],
+            sharedNotes: [],
+            dailyNotes: [],
+            notifications: [],
+          };
+        }
+        return persistedState;
+      },
       partialize: (state) => {
         // Exclude transient UI state from persistence for instantaneous modal opening/closing
         const {
