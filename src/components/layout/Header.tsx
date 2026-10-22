@@ -253,7 +253,13 @@ const Header: React.FC = () => {
             className="flex items-center gap-1.5 px-2 py-1 rounded-xl bg-nexus-surface-2 border text-xs font-semibold text-nexus-text"
             style={{ borderColor: accentColor }}
           >
-            <span className="text-sm">{currentAccount?.avatar}</span>
+            <span className="text-sm flex items-center justify-center">
+              {currentAccount?.avatar && (currentAccount.avatar.startsWith('http') || currentAccount.avatar.startsWith('data:')) ? (
+                <img src={currentAccount.avatar} alt="Avatar" className="w-5 h-5 rounded-full object-cover" />
+              ) : (
+                currentAccount?.avatar || '👤'
+              )}
+            </span>
             <span className="hidden sm:inline capitalize">{currentAccount?.displayName}</span>
           </div>
 

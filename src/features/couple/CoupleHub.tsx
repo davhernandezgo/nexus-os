@@ -131,14 +131,7 @@ export default function CoupleHub() {
   };
 
   const handleCreateSpace = () => {
-    createCoupleSpace('David & Cami', { david: 50, cami: 50 });
-  };
-
-  const handleDemoActivate = () => {
-    if (!coupleSpace) {
-      createCoupleSpace('David & Cami', { david: 50, cami: 50 });
-    }
-    joinCoupleSpace(coupleSpace?.code || 'COUPLE-DEMO');
+    createCoupleSpace('Espacio de Pareja', { david: 50, cami: 50 });
   };
 
   const handleSaveSettings = (e: React.FormEvent) => {
@@ -207,22 +200,15 @@ export default function CoupleHub() {
               </div>
 
               <p className="text-[11px] text-nexus-text-muted">
-                Comparte este código con tu pareja para que lo ingrese en su dispositivo. También puedes activar la conexión de prueba inmediata:
+                Comparte este código con tu pareja para que lo ingrese en su dispositivo desde su propia cuenta y vincular sus espacios.
               </p>
 
-              <div className="flex flex-col sm:flex-row items-center gap-2 pt-1">
-                <button
-                  onClick={handleDemoActivate}
-                  className="w-full sm:w-auto flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gradient-to-r from-pink-500 to-indigo-600 hover:opacity-95 text-white font-semibold text-xs transition shadow-lg shadow-pink-500/20"
-                >
-                  <Sparkles className="w-4 h-4" />
-                  <span>⚡ Conectar David & Cami Automáticamente (Demo)</span>
-                </button>
+              <div className="flex items-center justify-end pt-1">
                 <button
                   onClick={unlinkCoupleSpace}
-                  className="px-3 py-2 text-xs text-nexus-text-muted hover:text-red-400 transition"
+                  className="px-3 py-1.5 text-xs text-nexus-text-muted hover:text-red-400 transition"
                 >
-                  Cancelar
+                  Cancelar Invitación
                 </button>
               </div>
             </div>
@@ -279,16 +265,6 @@ export default function CoupleHub() {
                     </button>
                   </form>
                 </div>
-              </div>
-
-              {/* Fast Instant Demo Activation */}
-              <div className="pt-2 text-center">
-                <button
-                  onClick={handleDemoActivate}
-                  className="text-xs text-nexus-text-muted hover:text-nexus-text underline decoration-pink-500/50 hover:decoration-pink-500 transition"
-                >
-                  ⚡ Activar espacio David & Cami con 1 clic (Entorno de desarrollo)
-                </button>
               </div>
             </div>
           )}

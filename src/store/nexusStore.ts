@@ -152,65 +152,30 @@ const defaultTimer: TimerSession = {
 };
 
 // ─── Store Implementation ───────────────────────────────────────
-const initialSeed = seedData();
-
 export const useNexusStore = create<NexusStore>()(
   persist(
     (set, get) => ({
       // ── Initial State ──
       currentUser: null,
-      currentOwner: 'david' as Owner,
+      currentOwner: null,
       contextMode: 'private' as ContextMode,
-      accounts: [
-        {
-          id: 'acc-david',
-          owner: 'david' as Owner,
-          displayName: 'David',
-          avatar: '👨‍💻',
-          pin: '1234',
-          accentColor: '#6366f1', // indigo
-        },
-        {
-          id: 'acc-cami',
-          owner: 'cami' as Owner,
-          displayName: 'Cami',
-          avatar: '👩‍🎨',
-          pin: '5678',
-          accentColor: '#ec4899', // pink
-        },
-      ],
-      isAuthenticated: true,
-      isInitialized: true,
+      accounts: [],
+      isAuthenticated: false,
+      isInitialized: false,
 
-      tasks: initialSeed.tasks,
-      projects: initialSeed.projects,
-      habits: initialSeed.habits,
-      tags: initialSeed.tags,
+      tasks: [],
+      projects: [],
+      habits: [],
+      tags: [],
       timeLogs: [],
-      expenses: initialSeed.expenses,
-      tripPlans: initialSeed.tripPlans,
-      sharedNotes: initialSeed.sharedNotes,
-      dailyNotes: initialSeed.dailyNotes,
-      notifications: initialSeed.notifications,
+      expenses: [],
+      tripPlans: [],
+      sharedNotes: [],
+      dailyNotes: [],
+      notifications: [],
       customTemplates: [],
-      coupleSpace: {
-        id: 'cs-david-cami',
-        name: 'David & Cami',
-        code: 'COUPLE-789X',
-        status: 'active',
-        user1Id: 'acc-david',
-        user2Id: 'acc-cami',
-        user1Name: 'David',
-        user2Name: 'Cami',
-        defaultSplitRatio: { david: 50, cami: 50 },
-        createdAt: new Date().toISOString(),
-      },
-      categoryBudgets: [
-        { id: 'cb-1', category: 'Mercado', monthlyLimit: 1200000, currency: 'COP', owner: 'david', visibility: 'couple' },
-        { id: 'cb-2', category: 'Vivienda', monthlyLimit: 2000000, currency: 'COP', owner: 'david', visibility: 'couple' },
-        { id: 'cb-3', category: 'Servicios', monthlyLimit: 500000, currency: 'COP', owner: 'david', visibility: 'couple' },
-        { id: 'cb-4', category: 'Salidas', monthlyLimit: 600000, currency: 'COP', owner: 'david', visibility: 'couple' },
-      ],
+      coupleSpace: null,
+      categoryBudgets: [],
       investments: [],
 
       timer: { ...defaultTimer },
@@ -221,20 +186,10 @@ export const useNexusStore = create<NexusStore>()(
       activeView: 'inbox',
 
       // ═══════════ AUTH ═══════════
-      login: (owner, pin) => {
-        const account = get().accounts.find(a => a.owner === owner);
-        if (account && account.pin === pin) {
-          set({ currentOwner: owner, isAuthenticated: true, contextMode: 'private' });
-          if (!get().isInitialized) {
-            get().initializeWithSeed();
-          }
-          return true;
-        }
-        return false;
-      },
+      login: () => false,
       setSupabaseUser: (user) => {
         if (!user) {
-          set({ currentUser: null, isAuthenticated: false });
+          set({ currentUser: null, currentOwner: null, isAuthenticated: false });
           return;
         }
         const email = user.email || '';
@@ -246,9 +201,10 @@ export const useNexusStore = create<NexusStore>()(
           'Usuario';
         const avatar = user.user_metadata?.avatar_url || '👤';
         const isCami = email.toLowerCase().includes('cami');
-        const ownerKey: Owner = isCami ? 'cami' : 'david';
+        const isDavid = email.toLowerCase().includes('david');
+        const ownerKey: Owner = isCami ? 'cami' : isDavid ? 'david' : user.id;
 
-        const accounts = get().accounts;
+        const accounts = get().accounts || [];
         const existingAcc = accounts.find(a => a.id === user.id || a.owner === ownerKey);
         const userAccount: Account = {
           id: user.id,
@@ -258,6 +214,14 @@ export const useNexusStore = create<NexusStore>()(
           pin: '0000',
           accentColor: isCami ? '#ec4899' : '#6366f1',
         };
+
+        const currentTags = get().tags || [];
+        const tags = currentTags.length === 0 ? [
+          { id: `tag-work-${Date.now()}`, name: 'Trabajo', color: '#6366f1', owner: ownerKey, visibility: 'private' as const },
+          { id: `tag-personal-${Date.now()}`, name: 'Personal', color: '#10b981', owner: ownerKey, visibility: 'private' as const },
+          { id: `tag-hogar-${Date.now()}`, name: 'Hogar', color: '#ec4899', owner: ownerKey, visibility: 'couple' as const },
+          { id: `tag-finanzas-${Date.now()}`, name: 'Finanzas', color: '#22c55e', owner: ownerKey, visibility: 'couple' as const },
+        ] : currentTags;
 
         set({
           currentUser: {
@@ -269,9 +233,10 @@ export const useNexusStore = create<NexusStore>()(
           currentOwner: ownerKey,
           isAuthenticated: true,
           contextMode: 'private',
+          tags,
           accounts: existingAcc
-            ? accounts.map(a => (a.owner === ownerKey ? { ...a, displayName: fullName, avatar } : a))
-            : [userAccount, ...accounts],
+            ? accounts.map(a => (a.owner === ownerKey || a.id === user.id ? { ...a, displayName: fullName, avatar } : a))
+            : [userAccount, ...accounts.filter(a => a.owner !== ownerKey)],
         });
       },
       logout: () => {
@@ -692,15 +657,21 @@ export const useNexusStore = create<NexusStore>()(
         }),
 
       // ═══════════ COUPLE HUB & PARTNERSHIP ═══════════
-      createCoupleSpace: (name = 'David & Cami', defaultRatio = { david: 50, cami: 50 }) => {
+      createCoupleSpace: (name = 'Espacio de Pareja', defaultRatio = { david: 50, cami: 50 }) => {
         const randomCode = `COUPLE-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+        const currentOwner = get().currentOwner || 'david';
+        const currentUser = get().currentUser;
+        const currentAccount = get().accounts.find(a => a.owner === currentOwner);
+        const userName = currentAccount?.displayName || currentUser?.displayName || 'Usuario 1';
+        const userId = currentAccount?.id || currentUser?.id || 'acc-user1';
+
         const newSpace: CoupleSpace = {
           id: `cs-${Date.now()}`,
           code: randomCode,
           status: 'pending',
           name,
-          user1Id: 'acc-david',
-          user1Name: 'David',
+          user1Id: userId,
+          user1Name: userName,
           defaultSplitRatio: defaultRatio,
           createdAt: new Date().toISOString(),
         };
@@ -709,16 +680,22 @@ export const useNexusStore = create<NexusStore>()(
       },
       joinCoupleSpace: (code) => {
         const current = get().coupleSpace;
+        const currentOwner = get().currentOwner || 'cami';
+        const currentUser = get().currentUser;
+        const currentAccount = get().accounts.find(a => a.owner === currentOwner);
+        const userName = currentAccount?.displayName || currentUser?.displayName || 'Usuario 2';
+        const userId = currentAccount?.id || currentUser?.id || 'acc-user2';
+
         if (!current) {
           const newSpace: CoupleSpace = {
             id: `cs-${Date.now()}`,
             code: code.trim().toUpperCase(),
             status: 'active',
-            name: 'Nuestro Espacio',
-            user1Id: 'acc-david',
-            user2Id: 'acc-cami',
-            user1Name: 'David',
-            user2Name: 'Cami',
+            name: 'Espacio Compartido',
+            user1Id: 'acc-partner',
+            user2Id: userId,
+            user1Name: 'Pareja',
+            user2Name: userName,
             defaultSplitRatio: { david: 50, cami: 50 },
             createdAt: new Date().toISOString(),
           };
@@ -730,8 +707,8 @@ export const useNexusStore = create<NexusStore>()(
             coupleSpace: {
               ...current,
               status: 'active',
-              user2Id: 'acc-cami',
-              user2Name: 'Cami',
+              user2Id: userId,
+              user2Name: userName,
             },
           });
           return true;
@@ -888,12 +865,19 @@ export const useNexusStore = create<NexusStore>()(
     }),
     {
       name: 'nexus-os-store',
-      version: 2,
+      version: 3,
       migrate: (persistedState: any, version: number) => {
-        if (version < 2) {
-          // Discard mock/preloaded demo data from earlier versions
+        if (version < 3) {
+          // Discard mock/preloaded demo data and enforce clean authentication
           return {
             ...persistedState,
+            currentUser: null,
+            currentOwner: null,
+            isAuthenticated: false,
+            accounts: [],
+            coupleSpace: null,
+            categoryBudgets: [],
+            investments: [],
             tasks: [],
             projects: [],
             habits: [],

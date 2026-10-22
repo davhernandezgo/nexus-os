@@ -22,7 +22,6 @@ export default function HabitsView() {
     adjustHabitValue,
     startTimer,
     accounts,
-    login,
   } = useNexusStore();
 
   const [createModalOpen, setCreateModalOpen] = useState(false);

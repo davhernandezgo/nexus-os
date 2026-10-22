@@ -38,12 +38,19 @@ const App: React.FC = () => {
       supabase.auth.getSession().then(({ data: { session } }) => {
         if (session?.user) {
           useNexusStore.getState().setSupabaseUser(session.user);
+        } else {
+          const state = useNexusStore.getState();
+          if (state.isAuthenticated && !state.currentUser) {
+            useNexusStore.getState().logout();
+          }
         }
       });
 
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
         if (session?.user) {
           useNexusStore.getState().setSupabaseUser(session.user);
+        } else if (event === 'SIGNED_OUT') {
+          useNexusStore.getState().logout();
         }
       });
 
