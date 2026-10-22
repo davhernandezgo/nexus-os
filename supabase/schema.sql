@@ -135,18 +135,64 @@ CREATE TABLE time_logs (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- ─── Expenses (Couple Hub) ──────────────────────────────────────
+-- ─── Couple Spaces (Multi-user Couple Hub Pairing) ──────────────
+CREATE TABLE couple_spaces (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  code TEXT NOT NULL UNIQUE,
+  status TEXT NOT NULL DEFAULT 'pending', -- 'pending' | 'active'
+  name TEXT NOT NULL DEFAULT 'David & Cami',
+  user1_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  user2_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  user1_name TEXT NOT NULL,
+  user2_name TEXT,
+  default_split_ratio JSONB DEFAULT '{"david": 50, "cami": 50}',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ─── Expenses (Personal & Couple Hub with Custom Split) ──────────
 CREATE TABLE expenses (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   description TEXT NOT NULL,
   amount DECIMAL(12,2) NOT NULL,
   currency TEXT DEFAULT 'COP',
   paid_by owner_type NOT NULL,
+  owner owner_type NOT NULL DEFAULT 'david',
+  visibility visibility_type NOT NULL DEFAULT 'couple',
   category TEXT DEFAULT 'Otro',
   date DATE NOT NULL DEFAULT CURRENT_DATE,
-  split_type TEXT DEFAULT 'equal',
+  split_type TEXT DEFAULT 'equal', -- 'equal' | 'percentage' | 'exact' | 'single'
   split_ratio JSONB,
+  exact_split JSONB,
+  single_beneficiary owner_type,
   project_id UUID REFERENCES projects(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ─── Category Budgets (Monthly Expense Targets) ─────────────────
+CREATE TABLE category_budgets (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  category TEXT NOT NULL,
+  monthly_limit DECIMAL(12,2) NOT NULL,
+  currency TEXT DEFAULT 'COP',
+  owner owner_type NOT NULL,
+  visibility visibility_type NOT NULL DEFAULT 'couple',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ─── Investments ($ USD Personal & Pareja) ───────────────────────
+CREATE TABLE investments (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  asset TEXT NOT NULL,
+  amount_usd DECIMAL(12,2) NOT NULL,
+  category TEXT NOT NULL, -- 'crypto' | 'stocks' | 'etf' | 'real_estate' | 'fixed_income' | 'commodities' | 'other'
+  date DATE NOT NULL DEFAULT CURRENT_DATE,
+  owner owner_type NOT NULL,
+  visibility visibility_type NOT NULL DEFAULT 'private',
+  platform TEXT,
+  notes TEXT,
+  shares_quantity DECIMAL(14,6),
+  purchase_price_usd DECIMAL(14,4),
+  contributions JSONB,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -221,7 +267,10 @@ ALTER TABLE tags ENABLE ROW LEVEL SECURITY;
 ALTER TABLE habits ENABLE ROW LEVEL SECURITY;
 ALTER TABLE habit_completions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE time_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE couple_spaces ENABLE ROW LEVEL SECURITY;
 ALTER TABLE expenses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE category_budgets ENABLE ROW LEVEL SECURITY;
+ALTER TABLE investments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE trip_plans ENABLE ROW LEVEL SECURITY;
 ALTER TABLE shared_notes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE daily_notes ENABLE ROW LEVEL SECURITY;
@@ -314,10 +363,62 @@ CREATE POLICY time_logs_select ON time_logs FOR SELECT
 CREATE POLICY time_logs_insert ON time_logs FOR INSERT
   WITH CHECK (owner = get_user_owner());
 
--- ─── Expenses: always visible to both (couple data) ─────────────
-CREATE POLICY expenses_all ON expenses FOR ALL
+-- ─── Couple Spaces: visible to members ──────────────────────────
+CREATE POLICY couple_spaces_all ON couple_spaces FOR ALL
   USING (TRUE)
   WITH CHECK (TRUE);
+
+-- ─── Expenses: owner sees private + both see couple ─────────────
+CREATE POLICY expenses_select ON expenses FOR SELECT
+  USING (
+    visibility = 'couple'
+    OR owner = get_user_owner()
+    OR paid_by = get_user_owner()
+  );
+CREATE POLICY expenses_insert ON expenses FOR INSERT
+  WITH CHECK (owner = get_user_owner() OR paid_by = get_user_owner());
+CREATE POLICY expenses_update ON expenses FOR UPDATE
+  USING (
+    visibility = 'couple'
+    OR owner = get_user_owner()
+  );
+CREATE POLICY expenses_delete ON expenses FOR DELETE
+  USING (
+    visibility = 'couple'
+    OR owner = get_user_owner()
+  );
+
+-- ─── Category Budgets: monthly limits per category ──────────────
+CREATE POLICY category_budgets_select ON category_budgets FOR SELECT
+  USING (
+    visibility = 'couple'
+    OR owner = get_user_owner()
+  );
+CREATE POLICY category_budgets_insert ON category_budgets FOR INSERT
+  WITH CHECK (owner = get_user_owner());
+CREATE POLICY category_budgets_update ON category_budgets FOR UPDATE
+  USING (
+    visibility = 'couple'
+    OR owner = get_user_owner()
+  );
+CREATE POLICY category_budgets_delete ON category_budgets FOR DELETE
+  USING (owner = get_user_owner());
+
+-- ─── Investments ($ USD): personal or couple ────────────────────
+CREATE POLICY investments_select ON investments FOR SELECT
+  USING (
+    visibility = 'couple'
+    OR owner = get_user_owner()
+  );
+CREATE POLICY investments_insert ON investments FOR INSERT
+  WITH CHECK (owner = get_user_owner());
+CREATE POLICY investments_update ON investments FOR UPDATE
+  USING (
+    visibility = 'couple'
+    OR owner = get_user_owner()
+  );
+CREATE POLICY investments_delete ON investments FOR DELETE
+  USING (owner = get_user_owner());
 
 -- ─── Trip Plans: always visible to both ─────────────────────────
 CREATE POLICY trip_plans_all ON trip_plans FOR ALL
@@ -350,6 +451,9 @@ CREATE POLICY notifications_update ON notifications FOR UPDATE
 -- ═══════════════════════════════════════════════════════════════════
 ALTER PUBLICATION supabase_realtime ADD TABLE tasks;
 ALTER PUBLICATION supabase_realtime ADD TABLE expenses;
+ALTER PUBLICATION supabase_realtime ADD TABLE couple_spaces;
+ALTER PUBLICATION supabase_realtime ADD TABLE category_budgets;
+ALTER PUBLICATION supabase_realtime ADD TABLE investments;
 ALTER PUBLICATION supabase_realtime ADD TABLE shared_notes;
 ALTER PUBLICATION supabase_realtime ADD TABLE habit_completions;
 ALTER PUBLICATION supabase_realtime ADD TABLE notifications;

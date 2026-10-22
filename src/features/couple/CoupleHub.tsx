@@ -6,33 +6,40 @@ import {
   CheckCircle2,
   DollarSign,
   Plane,
-  StickyNote,
   Plus,
   Calendar,
   Lock,
   ArrowRight,
   Flame,
-  AlertCircle,
-  Tag,
   Square,
   Sparkles,
   X,
+  TrendingUp,
+  Copy,
+  Check,
+  Settings,
+  Share2,
+  Sliders,
+  UserPlus,
+  Users,
 } from 'lucide-react';
 import { useNexusStore } from '../../store/nexusStore';
 import type { Task, Habit, Priority } from '../../types/nexus';
 import ExpenseTracker from './ExpenseTracker';
 import TripPlanner from './TripPlanner';
 import SharedBoard from './SharedBoard';
+import InvestmentsView from '../investments/InvestmentsView';
 import { v4 as uuidv4 } from 'uuid';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-type CoupleTab = 'tasks' | 'habits' | 'expenses' | 'trips' | 'board';
+type CoupleTab = 'expenses' | 'investments' | 'tasks' | 'habits' | 'trips' | 'board';
 
 const TABS: { id: CoupleTab; label: string; icon: string }[] = [
+  { id: 'expenses', label: 'Gastos & Presupuesto', icon: '💰' },
+  { id: 'investments', label: 'Inversiones USD', icon: '📈' },
   { id: 'tasks', label: 'Tareas', icon: '📋' },
   { id: 'habits', label: 'Hábitos', icon: '✅' },
-  { id: 'expenses', label: 'Gastos', icon: '💰' },
   { id: 'trips', label: 'Viajes', icon: '✈️' },
   { id: 'board', label: 'Pizarra', icon: '📌' },
 ];
@@ -50,9 +57,26 @@ export default function CoupleHub() {
     setSelectedTaskId,
     getBalance,
     currentOwner,
+    coupleSpace,
+    createCoupleSpace,
+    joinCoupleSpace,
+    updateCoupleSpace,
+    unlinkCoupleSpace,
   } = useNexusStore();
 
   const [activeTab, setActiveTab] = useState<CoupleTab>('expenses');
+
+  // Space invitation state
+  const [inputJoinCode, setInputJoinCode] = useState('');
+  const [joinError, setJoinError] = useState('');
+  const [copiedCode, setCopiedCode] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+
+  // Settings state
+  const [spaceName, setSpaceName] = useState(coupleSpace?.name || 'David & Cami');
+  const [defaultDavidPct, setDefaultDavidPct] = useState<number>(
+    coupleSpace?.defaultSplitRatio?.david ?? 50
+  );
 
   // Task tab state
   const [taskFilter, setTaskFilter] = useState<'all' | 'pending' | 'done'>('pending');
@@ -78,41 +102,202 @@ export default function CoupleHub() {
     }
   }, [isCoupleContext, switchContext]);
 
-  if (!isCoupleContext) {
+  // Sync settings when space changes
+  useEffect(() => {
+    if (coupleSpace) {
+      setSpaceName(coupleSpace.name);
+      setDefaultDavidPct(coupleSpace.defaultSplitRatio?.david ?? 50);
+    }
+  }, [coupleSpace]);
+
+  const handleCopyCode = () => {
+    if (!coupleSpace?.code) return;
+    navigator.clipboard.writeText(coupleSpace.code);
+    setCopiedCode(true);
+    setTimeout(() => setCopiedCode(false), 2000);
+  };
+
+  const handleJoinSpace = (e: React.FormEvent) => {
+    e.preventDefault();
+    setJoinError('');
+    if (!inputJoinCode.trim()) return;
+
+    const ok = joinCoupleSpace(inputJoinCode.trim());
+    if (ok) {
+      setInputJoinCode('');
+    } else {
+      setJoinError('Código inválido. Verifica el código e intenta de nuevo.');
+    }
+  };
+
+  const handleCreateSpace = () => {
+    createCoupleSpace('David & Cami', { david: 50, cami: 50 });
+  };
+
+  const handleDemoActivate = () => {
+    if (!coupleSpace) {
+      createCoupleSpace('David & Cami', { david: 50, cami: 50 });
+    }
+    joinCoupleSpace(coupleSpace?.code || 'COUPLE-DEMO');
+  };
+
+  const handleSaveSettings = (e: React.FormEvent) => {
+    e.preventDefault();
+    updateCoupleSpace({
+      name: spaceName.trim() || 'Nuestro Espacio',
+      defaultSplitRatio: { david: defaultDavidPct, cami: 100 - defaultDavidPct },
+    });
+    setShowSettingsModal(false);
+  };
+
+  // If couple space is pending or null, show Invitation / Pairing Flow
+  const isSpaceActive = coupleSpace && coupleSpace.status === 'active';
+
+  if (!isSpaceActive) {
     return (
-      <div className="h-full flex items-center justify-center p-6">
+      <div className="h-full flex items-center justify-center p-4 sm:p-6 max-w-2xl mx-auto">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="max-w-md w-full rounded-2xl border border-nexus-border bg-nexus-surface p-8 text-center shadow-2xl space-y-5"
+          className="w-full rounded-3xl border border-nexus-border bg-nexus-surface p-6 sm:p-8 shadow-2xl space-y-6 relative overflow-hidden"
         >
-          <div className="w-16 h-16 rounded-2xl bg-pink-500/10 border border-pink-500/20 text-pink-400 flex items-center justify-center mx-auto text-3xl">
-            💑
-          </div>
+          {/* Subtle glow background */}
+          <div className="absolute -top-24 -left-24 w-72 h-72 bg-pink-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-24 -right-24 w-72 h-72 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
 
-          <div className="space-y-2">
-            <h2 className="text-xl font-bold text-nexus-text">Hub de Pareja — David & Cami</h2>
-            <p className="text-sm text-nexus-text-muted leading-relaxed">
-              Actualmente estás en <span className="text-nexus-text font-semibold">Modo Privado</span>.
-              Para acceder a tareas compartidas, finanzas 50/50, viajes y notas de pareja, cambia a modo Pareja.
+          <div className="text-center space-y-2 relative">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-pink-500 to-indigo-500 flex items-center justify-center text-3xl shadow-lg shadow-pink-500/20 mx-auto">
+              💑
+            </div>
+            <h2 className="text-2xl font-bold text-nexus-text">Vincular Hub de Pareja</h2>
+            <p className="text-xs text-nexus-text-muted max-w-md mx-auto leading-relaxed">
+              NexusOS escala a múltiples usuarios manteniendo privacidad individual. Al conectar con tu pareja mediante un código de invitación, se activan las finanzas compartidas, presupuestos, inversiones y planes de viaje.
             </p>
           </div>
 
-          <div className="pt-2">
-            <button
-              onClick={() => switchContext('couple')}
-              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 hover:opacity-90 text-white font-semibold text-sm transition shadow-lg shadow-pink-500/25 active:scale-95"
-            >
-              <span>Cambiar a Modo Pareja</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
+          {/* Invitation Section */}
+          {coupleSpace?.status === 'pending' ? (
+            <div className="space-y-4 p-5 rounded-2xl bg-nexus-surface-2 border border-nexus-border relative">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold uppercase tracking-wider text-pink-400 flex items-center gap-1.5">
+                  <UserPlus className="w-4 h-4" /> Invitación Generada
+                </span>
+                <span className="text-[11px] text-nexus-text-muted">Esperando a tu pareja...</span>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3.5 rounded-xl bg-nexus-surface-3 border border-nexus-border">
+                <div className="text-center sm:text-left">
+                  <span className="text-[10px] text-nexus-text-muted uppercase tracking-wider block">
+                    Código de Invitación Único
+                  </span>
+                  <span className="text-2xl font-black font-mono tracking-widest text-nexus-text">
+                    {coupleSpace.code}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleCopyCode}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-pink-500/20 text-pink-300 border border-pink-500/30 hover:bg-pink-500/30 text-xs font-semibold transition"
+                  >
+                    {copiedCode ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                    <span>{copiedCode ? '¡Copiado!' : 'Copiar Código'}</span>
+                  </button>
+                </div>
+              </div>
+
+              <p className="text-[11px] text-nexus-text-muted">
+                Comparte este código con tu pareja para que lo ingrese en su dispositivo. También puedes activar la conexión de prueba inmediata:
+              </p>
+
+              <div className="flex flex-col sm:flex-row items-center gap-2 pt-1">
+                <button
+                  onClick={handleDemoActivate}
+                  className="w-full sm:w-auto flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gradient-to-r from-pink-500 to-indigo-600 hover:opacity-95 text-white font-semibold text-xs transition shadow-lg shadow-pink-500/20"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  <span>⚡ Conectar David & Cami Automáticamente (Demo)</span>
+                </button>
+                <button
+                  onClick={unlinkCoupleSpace}
+                  className="px-3 py-2 text-xs text-nexus-text-muted hover:text-red-400 transition"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Option 1: Create Invite Code */}
+                <div className="p-5 rounded-2xl bg-nexus-surface-2 border border-nexus-border flex flex-col justify-between space-y-4">
+                  <div className="space-y-1.5">
+                    <div className="w-9 h-9 rounded-xl bg-pink-500/10 border border-pink-500/20 text-pink-400 flex items-center justify-center">
+                      <Plus className="w-5 h-5" />
+                    </div>
+                    <h4 className="font-bold text-sm text-nexus-text">Crear Nuevo Espacio</h4>
+                    <p className="text-[11px] text-nexus-text-muted leading-relaxed">
+                      Genera un código de invitación para compartirlo con tu pareja.
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={handleCreateSpace}
+                    className="w-full py-2.5 px-3 rounded-xl bg-nexus-accent-pink hover:bg-nexus-accent-pink/90 text-white font-semibold text-xs transition shadow-md shadow-pink-500/20"
+                  >
+                    Generar Código
+                  </button>
+                </div>
+
+                {/* Option 2: Join with existing code */}
+                <div className="p-5 rounded-2xl bg-nexus-surface-2 border border-nexus-border flex flex-col justify-between space-y-4">
+                  <div className="space-y-1.5">
+                    <div className="w-9 h-9 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center">
+                      <Users className="w-5 h-5" />
+                    </div>
+                    <h4 className="font-bold text-sm text-nexus-text">Unirse a Espacio</h4>
+                    <p className="text-[11px] text-nexus-text-muted leading-relaxed">
+                      Si tu pareja ya generó un código, ingrésalo aquí.
+                    </p>
+                  </div>
+
+                  <form onSubmit={handleJoinSpace} className="space-y-2">
+                    <input
+                      type="text"
+                      value={inputJoinCode}
+                      onChange={e => setInputJoinCode(e.target.value.toUpperCase())}
+                      placeholder="COUPLE-XXXX"
+                      className="w-full px-3 py-2 rounded-xl bg-nexus-surface-3 border border-nexus-border text-xs text-nexus-text font-mono uppercase focus:outline-none focus:border-nexus-accent-indigo"
+                    />
+                    {joinError && <p className="text-[10px] text-red-400">{joinError}</p>}
+                    <button
+                      type="submit"
+                      disabled={!inputJoinCode.trim()}
+                      className="w-full py-2 px-3 rounded-xl bg-nexus-accent-indigo hover:bg-nexus-accent-indigo/90 text-white font-semibold text-xs transition disabled:opacity-40"
+                    >
+                      Unirse
+                    </button>
+                  </form>
+                </div>
+              </div>
+
+              {/* Fast Instant Demo Activation */}
+              <div className="pt-2 text-center">
+                <button
+                  onClick={handleDemoActivate}
+                  className="text-xs text-nexus-text-muted hover:text-nexus-text underline decoration-pink-500/50 hover:decoration-pink-500 transition"
+                >
+                  ⚡ Activar espacio David & Cami con 1 clic (Entorno de desarrollo)
+                </button>
+              </div>
+            </div>
+          )}
         </motion.div>
       </div>
     );
   }
 
-  // Filter tasks and habits for couple
+  // Active couple data
   const coupleTasks = getVisibleTasks().filter(t => t.visibility === 'couple');
   const coupleHabits = getVisibleHabits().filter(h => h.visibility === 'couple');
   const balance = getBalance();
@@ -176,16 +361,30 @@ export default function CoupleHub() {
 
   return (
     <div className="h-full overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
-      {/* ─── Header ────────────────────────────────────────────── */}
+      {/* ─── Header & Partner Status Bar ────────────────────────── */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-nexus-border">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-pink-500 to-indigo-500 flex items-center justify-center text-2xl shadow-lg shadow-pink-500/20">
             💑
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-nexus-text">Hub de Pareja — David & Cami</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-bold text-nexus-text">
+                Hub de Pareja — {coupleSpace?.name || 'David & Cami'}
+              </h1>
+              <button
+                onClick={() => setShowSettingsModal(true)}
+                className="p-1 rounded-lg text-nexus-text-muted hover:text-nexus-text hover:bg-nexus-surface-2 transition"
+                title="Configuración de Pareja & Acuerdos de Split"
+              >
+                <Settings className="w-4 h-4" />
+              </button>
+            </div>
             <p className="text-xs text-nexus-text-muted mt-0.5">
-              Espacio sincronizado para proyectos conjuntos, finanzas, viajes y metas del hogar
+              Espacio activo • Split por defecto:{' '}
+              <span className="text-pink-400 font-semibold font-mono">
+                {coupleSpace?.defaultSplitRatio?.david || 50}% David / {coupleSpace?.defaultSplitRatio?.cami || 50}% Cami
+              </span>
             </p>
           </div>
         </div>
@@ -193,10 +392,10 @@ export default function CoupleHub() {
         {/* Quick Summary Badges */}
         <div className="flex items-center gap-3">
           <div className="px-3.5 py-2 rounded-xl bg-nexus-surface border border-nexus-border text-xs flex items-center gap-2">
-            <span className="text-pink-400 font-bold">50/50</span>
+            <span className="text-pink-400 font-bold">Balance</span>
             <span className="text-nexus-text-secondary">
               {balance.net === 0
-                ? 'En paz'
+                ? 'Al día 🎉'
                 : balance.net > 0
                 ? `Cami debe $${Math.abs(balance.net).toLocaleString('es-CO')}`
                 : `David debe $${Math.abs(balance.net).toLocaleString('es-CO')}`}
@@ -247,6 +446,18 @@ export default function CoupleHub() {
             transition={{ duration: 0.2 }}
           >
             <ExpenseTracker />
+          </motion.div>
+        )}
+
+        {activeTab === 'investments' && (
+          <motion.div
+            key="investments"
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.2 }}
+          >
+            <InvestmentsView />
           </motion.div>
         )}
 
@@ -487,6 +698,116 @@ export default function CoupleHub() {
         )}
       </AnimatePresence>
 
+      {/* ─── Couple Space Settings Modal ───────────────────────── */}
+      <AnimatePresence>
+        {showSettingsModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="w-full max-w-md rounded-2xl border border-nexus-border bg-nexus-surface p-6 shadow-2xl space-y-4"
+            >
+              <div className="flex items-center justify-between border-b border-nexus-border pb-3">
+                <div className="flex items-center gap-2">
+                  <Settings className="w-5 h-5 text-nexus-accent-pink" />
+                  <h3 className="text-base font-bold text-nexus-text">Ajustes de Pareja</h3>
+                </div>
+                <button
+                  onClick={() => setShowSettingsModal(false)}
+                  className="p-1 rounded-lg text-nexus-text-muted hover:text-nexus-text hover:bg-nexus-surface-2 transition"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveSettings} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-nexus-text-muted uppercase tracking-wider mb-1.5">
+                    Nombre del Espacio
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={spaceName}
+                    onChange={e => setSpaceName(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-nexus-surface-2 border border-nexus-border text-xs text-nexus-text focus:outline-none focus:border-nexus-accent-pink"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-nexus-text-muted uppercase tracking-wider mb-1.5">
+                    Acuerdo de Split por Defecto (%)
+                  </label>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-xs font-semibold">
+                      <span className="text-indigo-400">David: {defaultDavidPct}%</span>
+                      <span className="text-pink-400">Cami: {100 - defaultDavidPct}%</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      step="5"
+                      value={defaultDavidPct}
+                      onChange={e => setDefaultDavidPct(Number(e.target.value))}
+                      className="w-full accent-nexus-accent-pink"
+                    />
+                    <div className="flex gap-1.5 justify-center">
+                      {[50, 60, 70].map(pct => (
+                        <button
+                          key={pct}
+                          type="button"
+                          onClick={() => setDefaultDavidPct(pct)}
+                          className={`text-[10px] px-2 py-0.5 rounded border transition ${
+                            defaultDavidPct === pct
+                              ? 'bg-nexus-accent-pink/20 text-pink-300 border-pink-500'
+                              : 'bg-nexus-surface-2 text-nexus-text-muted border-nexus-border'
+                          }`}
+                        >
+                          {pct}/{100 - pct}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-nexus-border flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (window.confirm('¿Desvincular este espacio de pareja? Los datos individuales se mantendrán.')) {
+                        unlinkCoupleSpace();
+                        setShowSettingsModal(false);
+                      }
+                    }}
+                    className="text-xs text-red-400 hover:text-red-300 font-medium"
+                  >
+                    Desvincular Espacio
+                  </button>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowSettingsModal(false)}
+                      className="px-3 py-1.5 rounded-xl text-xs text-nexus-text-muted hover:text-nexus-text"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-4 py-1.5 rounded-xl bg-nexus-accent-pink hover:bg-nexus-accent-pink/90 text-white font-semibold text-xs transition"
+                    >
+                      Guardar Cambios
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* ─── Add Task Modal ────────────────────────────────────── */}
       <AnimatePresence>
         {showAddTaskModal && (
@@ -498,10 +819,10 @@ export default function CoupleHub() {
               className="w-full max-w-md rounded-2xl border border-nexus-border bg-nexus-surface p-6 shadow-2xl space-y-4"
             >
               <div className="flex items-center justify-between border-b border-nexus-border pb-3">
-                <h3 className="font-bold text-base text-nexus-text">Nueva Tarea de Pareja</h3>
+                <h3 className="text-base font-bold text-nexus-text">Nueva Tarea Compartida</h3>
                 <button
                   onClick={() => setShowAddTaskModal(false)}
-                  className="p-1 text-nexus-text-muted hover:text-nexus-text"
+                  className="p-1 rounded-lg text-nexus-text-muted hover:text-nexus-text hover:bg-nexus-surface-2 transition"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -509,82 +830,75 @@ export default function CoupleHub() {
 
               <form onSubmit={handleCreateTask} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold text-nexus-text-muted mb-1">Título</label>
+                  <label className="block text-xs font-semibold text-nexus-text-muted uppercase tracking-wider mb-1.5">
+                    Título de la Tarea *
+                  </label>
                   <input
                     type="text"
                     required
+                    autoFocus
                     value={newTaskTitle}
                     onChange={e => setNewTaskTitle(e.target.value)}
-                    placeholder="Ej. Revisar cotización cortinas..."
-                    className="w-full px-3 py-2 rounded-xl bg-nexus-surface-2 border border-nexus-border text-nexus-text text-sm focus:outline-none focus:border-indigo-500"
+                    placeholder="Ej. Comprar repisa para la cocina..."
+                    className="w-full px-3 py-2 rounded-xl bg-nexus-surface-2 border border-nexus-border text-xs text-nexus-text focus:outline-none focus:border-nexus-accent-indigo"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-nexus-text-muted mb-1">Prioridad</label>
+                    <label className="block text-xs font-semibold text-nexus-text-muted uppercase tracking-wider mb-1.5">
+                      Prioridad
+                    </label>
                     <select
                       value={newTaskPriority}
                       onChange={e => setNewTaskPriority(e.target.value as Priority)}
-                      className="w-full px-3 py-2 rounded-xl bg-nexus-surface-2 border border-nexus-border text-nexus-text text-sm focus:outline-none focus:border-indigo-500"
+                      className="w-full px-3 py-2 rounded-xl bg-nexus-surface-2 border border-nexus-border text-xs text-nexus-text focus:outline-none focus:border-nexus-accent-indigo"
                     >
-                      <option value="P1">P1 (Urgente)</option>
-                      <option value="P2">P2 (Alta)</option>
-                      <option value="P3">P3 (Media)</option>
-                      <option value="P4">P4 (Baja)</option>
+                      <option value="P1">P1 - Crítico</option>
+                      <option value="P2">P2 - Alto</option>
+                      <option value="P3">P3 - Medio</option>
+                      <option value="P4">P4 - Bajo</option>
                     </select>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-nexus-text-muted mb-1">Fecha límite</label>
-                    <input
-                      type="date"
-                      value={newTaskDueDate}
-                      onChange={e => setNewTaskDueDate(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-nexus-surface-2 border border-nexus-border text-nexus-text text-sm focus:outline-none focus:border-indigo-500"
-                    />
+                    <label className="block text-xs font-semibold text-nexus-text-muted uppercase tracking-wider mb-1.5">
+                      Asignado A
+                    </label>
+                    <select
+                      value={newTaskAssignee}
+                      onChange={e => setNewTaskAssignee(e.target.value as 'david' | 'cami')}
+                      className="w-full px-3 py-2 rounded-xl bg-nexus-surface-2 border border-nexus-border text-xs text-nexus-text focus:outline-none focus:border-nexus-accent-indigo"
+                    >
+                      <option value="david">👨‍💻 David</option>
+                      <option value="cami">👩‍🎨 Cami</option>
+                    </select>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-nexus-text-muted mb-1">Responsable principal</label>
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setNewTaskAssignee('david')}
-                      className={`py-2 px-3 rounded-xl text-xs font-semibold border ${
-                        newTaskAssignee === 'david'
-                          ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500'
-                          : 'bg-nexus-surface-2 text-nexus-text-muted border-nexus-border'
-                      }`}
-                    >
-                      👨‍💻 David
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setNewTaskAssignee('cami')}
-                      className={`py-2 px-3 rounded-xl text-xs font-semibold border ${
-                        newTaskAssignee === 'cami'
-                          ? 'bg-pink-500/20 text-pink-300 border-pink-500'
-                          : 'bg-nexus-surface-2 text-nexus-text-muted border-nexus-border'
-                      }`}
-                    >
-                      👩‍🎨 Cami
-                    </button>
-                  </div>
+                  <label className="block text-xs font-semibold text-nexus-text-muted uppercase tracking-wider mb-1.5">
+                    Fecha Límite
+                  </label>
+                  <input
+                    type="date"
+                    value={newTaskDueDate}
+                    onChange={e => setNewTaskDueDate(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-nexus-surface-2 border border-nexus-border text-xs text-nexus-text focus:outline-none focus:border-nexus-accent-indigo"
+                  />
                 </div>
 
-                <div className="flex justify-end gap-3 pt-3 border-t border-nexus-border">
+                <div className="flex items-center justify-end gap-3 pt-3 border-t border-nexus-border">
                   <button
                     type="button"
                     onClick={() => setShowAddTaskModal(false)}
-                    className="px-4 py-2 text-xs font-medium text-nexus-text-muted hover:text-nexus-text"
+                    className="px-4 py-2 rounded-xl text-xs font-medium text-nexus-text-muted hover:text-nexus-text hover:bg-nexus-surface-2 transition"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
-                    className="px-5 py-2 rounded-xl bg-nexus-accent-indigo text-white text-xs font-semibold shadow-md"
+                    className="px-5 py-2 rounded-xl bg-nexus-accent-indigo hover:bg-nexus-accent-indigo/90 text-white font-semibold text-xs transition shadow-lg shadow-indigo-500/20"
                   >
                     Crear Tarea
                   </button>
@@ -595,7 +909,7 @@ export default function CoupleHub() {
         )}
       </AnimatePresence>
 
-      {/* ─── Add Habit Modal ───────────────────────────────────── */}
+      {/* ─── Add Habit Modal ────────────────────────────────────── */}
       <AnimatePresence>
         {showAddHabitModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
@@ -606,65 +920,70 @@ export default function CoupleHub() {
               className="w-full max-w-md rounded-2xl border border-nexus-border bg-nexus-surface p-6 shadow-2xl space-y-4"
             >
               <div className="flex items-center justify-between border-b border-nexus-border pb-3">
-                <h3 className="font-bold text-base text-nexus-text">Nuevo Hábito de Pareja</h3>
+                <h3 className="text-base font-bold text-nexus-text">Nuevo Hábito Compartido</h3>
                 <button
                   onClick={() => setShowAddHabitModal(false)}
-                  className="p-1 text-nexus-text-muted hover:text-nexus-text"
+                  className="p-1 rounded-lg text-nexus-text-muted hover:text-nexus-text hover:bg-nexus-surface-2 transition"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
               <form onSubmit={handleCreateHabit} className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-nexus-text-muted mb-1">Ícono</label>
-                    <input
-                      type="text"
-                      maxLength={2}
-                      value={newHabitIcon}
-                      onChange={e => setNewHabitIcon(e.target.value)}
-                      className="w-14 text-center text-xl p-2 rounded-xl bg-nexus-surface-2 border border-nexus-border"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <label className="block text-xs font-semibold text-nexus-text-muted mb-1">Nombre</label>
-                    <input
-                      type="text"
-                      required
-                      value={newHabitName}
-                      onChange={e => setNewHabitName(e.target.value)}
-                      placeholder="Ej. Caminar 30 mins juntos"
-                      className="w-full px-3 py-2 rounded-xl bg-nexus-surface-2 border border-nexus-border text-nexus-text text-sm focus:outline-none focus:border-pink-500"
-                    />
-                  </div>
-                </div>
-
                 <div>
-                  <label className="block text-xs font-semibold text-nexus-text-muted mb-1">
-                    Frecuencia objetivo ({newHabitFrequency} días / semana)
+                  <label className="block text-xs font-semibold text-nexus-text-muted uppercase tracking-wider mb-1.5">
+                    Nombre del Hábito *
                   </label>
                   <input
-                    type="range"
-                    min="1"
-                    max="7"
-                    value={newHabitFrequency}
-                    onChange={e => setNewHabitFrequency(parseInt(e.target.value))}
-                    className="w-full accent-pink-500"
+                    type="text"
+                    required
+                    autoFocus
+                    value={newHabitName}
+                    onChange={e => setNewHabitName(e.target.value)}
+                    placeholder="Ej. Caminar 30 mins juntos, Noche de lectura..."
+                    className="w-full px-3 py-2 rounded-xl bg-nexus-surface-2 border border-nexus-border text-xs text-nexus-text focus:outline-none focus:border-nexus-accent-pink"
                   />
                 </div>
 
-                <div className="flex justify-end gap-3 pt-3 border-t border-nexus-border">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-nexus-text-muted uppercase tracking-wider mb-1.5">
+                      Emoji
+                    </label>
+                    <input
+                      type="text"
+                      value={newHabitIcon}
+                      onChange={e => setNewHabitIcon(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl bg-nexus-surface-2 border border-nexus-border text-sm text-nexus-text text-center focus:outline-none focus:border-nexus-accent-pink"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-nexus-text-muted uppercase tracking-wider mb-1.5">
+                      Meta Días/Semana
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="7"
+                      value={newHabitFrequency}
+                      onChange={e => setNewHabitFrequency(Number(e.target.value))}
+                      className="w-full px-3 py-2 rounded-xl bg-nexus-surface-2 border border-nexus-border text-xs text-nexus-text text-center focus:outline-none focus:border-nexus-accent-pink"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-end gap-3 pt-3 border-t border-nexus-border">
                   <button
                     type="button"
                     onClick={() => setShowAddHabitModal(false)}
-                    className="px-4 py-2 text-xs font-medium text-nexus-text-muted hover:text-nexus-text"
+                    className="px-4 py-2 rounded-xl text-xs font-medium text-nexus-text-muted hover:text-nexus-text hover:bg-nexus-surface-2 transition"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
-                    className="px-5 py-2 rounded-xl bg-nexus-accent-pink text-white text-xs font-semibold shadow-md"
+                    className="px-5 py-2 rounded-xl bg-nexus-accent-pink hover:bg-nexus-accent-pink/90 text-white font-semibold text-xs transition shadow-lg shadow-pink-500/20"
                   >
                     Crear Hábito
                   </button>

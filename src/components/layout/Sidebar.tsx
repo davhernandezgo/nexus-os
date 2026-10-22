@@ -14,6 +14,7 @@ import {
   X,
   Sparkles,
   Plus,
+  TrendingUp,
 } from 'lucide-react';
 import { useNexusStore } from '../../store/nexusStore';
 import EmojiPicker from '../ui/EmojiPicker';
@@ -32,6 +33,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'calendar', label: 'Calendario', path: '/calendar', icon: Calendar },
   { id: 'habits', label: 'Hábitos', path: '/habits', icon: CheckSquare },
   { id: 'couple', label: 'Hub Pareja', path: '/couple', icon: HeartHandshake },
+  { id: 'investments', label: 'Inversiones ($)', path: '/investments', icon: TrendingUp },
   { id: 'graph', label: 'Grafo', path: '/graph', icon: Network },
   { id: 'daily-note', label: 'Nota del Día', path: '/daily-note', icon: FileText },
 ];

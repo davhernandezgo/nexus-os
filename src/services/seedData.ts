@@ -21,5 +21,7 @@ export function seedData() {
     sharedNotes: [],
     dailyNotes: [],
     notifications: [],
+    investments: [],
+    categoryBudgets: [],
   };
 }

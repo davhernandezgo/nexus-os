@@ -16,6 +16,7 @@ import EisenhowerView from './features/tasks/EisenhowerView';
 import CalendarView from './features/calendar/CalendarView';
 import HabitsView from './features/habits/HabitsView';
 import CoupleView from './features/couple/CoupleView';
+import InvestmentsView from './features/investments/InvestmentsView';
 import GraphView from './features/graph/GraphView';
 import DailyNoteView from './features/notes/DailyNoteView';
 import ProjectView from './features/tasks/ProjectView';
@@ -79,6 +80,7 @@ const App: React.FC = () => {
                 <Route path="/calendar" element={<CalendarView />} />
                 <Route path="/habits" element={<HabitsView />} />
                 <Route path="/couple" element={<CoupleView />} />
+                <Route path="/investments" element={<InvestmentsView />} />
                 <Route path="/graph" element={<GraphView />} />
                 <Route path="/daily-note" element={<DailyNoteView />} />
                 <Route path="/project/:projectId" element={<ProjectView />} />

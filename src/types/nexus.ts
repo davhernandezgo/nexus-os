@@ -247,18 +247,72 @@ export interface TimeLog {
   note: string;
 }
 
-// ─── Couple Hub ─────────────────────────────────────────────────
+// ─── Couple Hub & Partnership ───────────────────────────────────
+export interface CoupleSpace {
+  id: string;
+  code: string;
+  status: 'pending' | 'active';
+  name: string;
+  user1Id: string;
+  user2Id?: string;
+  user1Name: string;
+  user2Name?: string;
+  defaultSplitRatio?: { david: number; cami: number }; // percentages e.g. { david: 50, cami: 50 }
+  createdAt: string;
+}
+
+export type ExpenseSplitType = 'equal' | 'percentage' | 'exact' | 'single';
+
 export interface Expense {
   id: string;
   description: string;
   amount: number;
   currency: string;
   paidBy: Owner;
+  owner: Owner;
+  visibility: Visibility;   // 'private' (Personal) | 'couple' (Compartido en pareja)
   category: string;
   date: string;
-  splitType: 'equal' | 'custom';
-  splitRatio?: { david: number; cami: number };
-  projectId?: string;      // linked couple project
+  splitType: ExpenseSplitType;
+  splitRatio?: { david: number; cami: number }; // Porcentajes e.g. { david: 60, cami: 40 }
+  exactSplit?: { david: number; cami: number }; // Montos exactos e.g. { david: 300000, cami: 150000 }
+  singleBeneficiary?: Owner;                   // Quién lo asume al 100% sin deuda
+  projectId?: string;                          // linked couple project
+}
+
+export interface CategoryBudget {
+  id: string;
+  category: string;
+  monthlyLimit: number;
+  currency: string;
+  owner: Owner;
+  visibility: Visibility;
+}
+
+// ─── Investments ($ USD) ────────────────────────────────────────
+export type InvestmentCategory =
+  | 'crypto'
+  | 'stocks'
+  | 'etf'
+  | 'real_estate'
+  | 'fixed_income'
+  | 'commodities'
+  | 'other';
+
+export interface Investment {
+  id: string;
+  asset: string;             // Nombre o ticker: ej. "Bitcoin (BTC)", "VOO (S&P 500)"
+  amountUsd: number;         // Monto en dólares USD
+  category: InvestmentCategory;
+  date: string;              // YYYY-MM-DD
+  owner: Owner;              // 'david' | 'cami'
+  visibility: Visibility;    // 'private' (Personal) | 'couple' (Conjunta en pareja)
+  platform?: string;         // Broker / Exchange (e.g. Binance, Interactive Brokers, Trii, Hapi, etc.)
+  notes?: string;            // Notas de la compra
+  sharesQuantity?: number;   // Cantidad comprada (opcional)
+  purchasePriceUsd?: number; // Precio unitario (opcional)
+  contributions?: { david: number; cami: number }; // Aportes de cada uno en USD si es conjunta
+  createdAt: string;
 }
 
 export interface TripPlan {

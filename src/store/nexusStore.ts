@@ -7,6 +7,7 @@ import type {
   Owner, Visibility, ContextMode, Account, Task, Project, Habit,
   TimerSession, TimeLog, Expense, TripPlan, SharedNote, DailyNote,
   NexusNotification, PageBlock, HabitCompletion, Tag, TaskTemplate,
+  CoupleSpace, CategoryBudget, Investment, ExpenseSplitType,
 } from '../types/nexus';
 import { seedData } from '../services/seedData';
 
@@ -31,6 +32,9 @@ export interface NexusStore {
   dailyNotes: DailyNote[];
   notifications: NexusNotification[];
   customTemplates: TaskTemplate[];
+  coupleSpace: CoupleSpace | null;
+  categoryBudgets: CategoryBudget[];
+  investments: Investment[];
 
   // Timer (global singleton)
   timer: TimerSession;
@@ -51,6 +55,8 @@ export interface NexusStore {
   getVisibleProjects: () => Project[];
   getVisibleHabits: () => Habit[];
   getVisibleExpenses: () => Expense[];
+  getVisibleInvestments: () => Investment[];
+  getVisibleCategoryBudgets: () => CategoryBudget[];
   getVisibleTags: () => Tag[];
   addTag: (tag: Tag) => void;
 
@@ -85,17 +91,29 @@ export interface NexusStore {
   setTimerMode: (mode: 'stopwatch' | 'pomodoro') => void;
   setPomodoroConfig: (focus: number, breakMin: number) => void;
 
-  // ── Couple Hub ──
+  // ── Couple Hub & Partnership ──
+  createCoupleSpace: (name?: string, defaultRatio?: { david: number; cami: number }) => CoupleSpace;
+  joinCoupleSpace: (code: string) => boolean;
+  updateCoupleSpace: (updates: Partial<CoupleSpace>) => void;
+  unlinkCoupleSpace: () => void;
   addExpense: (expense: Expense) => void;
   updateExpense: (id: string, updates: Partial<Expense>) => void;
   deleteExpense: (id: string) => void;
   getBalance: () => { david: number; cami: number; net: number };
+  addCategoryBudget: (budget: CategoryBudget) => void;
+  updateCategoryBudget: (id: string, updates: Partial<CategoryBudget>) => void;
+  deleteCategoryBudget: (id: string) => void;
   addTripPlan: (trip: TripPlan) => void;
   updateTripPlan: (id: string, updates: Partial<TripPlan>) => void;
   deleteTripPlan: (id: string) => void;
   addSharedNote: (note: SharedNote) => void;
   updateSharedNote: (id: string, updates: Partial<SharedNote>) => void;
   deleteSharedNote: (id: string) => void;
+
+  // ── Investments ($ USD) ──
+  addInvestment: (inv: Investment) => void;
+  updateInvestment: (id: string, updates: Partial<Investment>) => void;
+  deleteInvestment: (id: string) => void;
 
   // ── Daily Notes ──
   getDailyNote: (date: string) => DailyNote | undefined;
@@ -171,6 +189,25 @@ export const useNexusStore = create<NexusStore>()(
       dailyNotes: initialSeed.dailyNotes,
       notifications: initialSeed.notifications,
       customTemplates: [],
+      coupleSpace: {
+        id: 'cs-david-cami',
+        name: 'David & Cami',
+        code: 'COUPLE-789X',
+        status: 'active',
+        user1Id: 'acc-david',
+        user2Id: 'acc-cami',
+        user1Name: 'David',
+        user2Name: 'Cami',
+        defaultSplitRatio: { david: 50, cami: 50 },
+        createdAt: new Date().toISOString(),
+      },
+      categoryBudgets: [
+        { id: 'cb-1', category: 'Mercado', monthlyLimit: 1200000, currency: 'COP', owner: 'david', visibility: 'couple' },
+        { id: 'cb-2', category: 'Vivienda', monthlyLimit: 2000000, currency: 'COP', owner: 'david', visibility: 'couple' },
+        { id: 'cb-3', category: 'Servicios', monthlyLimit: 500000, currency: 'COP', owner: 'david', visibility: 'couple' },
+        { id: 'cb-4', category: 'Salidas', monthlyLimit: 600000, currency: 'COP', owner: 'david', visibility: 'couple' },
+      ],
+      investments: [],
 
       timer: { ...defaultTimer },
 
@@ -244,9 +281,52 @@ export const useNexusStore = create<NexusStore>()(
         }
       },
       getVisibleExpenses: () => {
-        const { expenses, currentOwner } = get();
+        const { expenses, currentOwner, contextMode } = get();
         if (!currentOwner) return [];
-        return expenses; // All expenses are couple-visible
+        switch (contextMode) {
+          case 'private':
+            return expenses.filter(e => (e.owner === currentOwner || e.paidBy === currentOwner) && e.visibility === 'private');
+          case 'couple':
+            return expenses.filter(e => e.visibility === 'couple');
+          case 'unified':
+            return expenses.filter(e =>
+              e.visibility === 'couple' || ((e.owner === currentOwner || e.paidBy === currentOwner) && e.visibility === 'private')
+            );
+          default:
+            return [];
+        }
+      },
+      getVisibleInvestments: () => {
+        const { investments, currentOwner, contextMode } = get();
+        if (!currentOwner) return [];
+        switch (contextMode) {
+          case 'private':
+            return investments.filter(i => i.owner === currentOwner && i.visibility === 'private');
+          case 'couple':
+            return investments.filter(i => i.visibility === 'couple');
+          case 'unified':
+            return investments.filter(i =>
+              i.visibility === 'couple' || (i.owner === currentOwner && i.visibility === 'private')
+            );
+          default:
+            return [];
+        }
+      },
+      getVisibleCategoryBudgets: () => {
+        const { categoryBudgets, currentOwner, contextMode } = get();
+        if (!currentOwner) return [];
+        switch (contextMode) {
+          case 'private':
+            return categoryBudgets.filter(b => b.owner === currentOwner && b.visibility === 'private');
+          case 'couple':
+            return categoryBudgets.filter(b => b.visibility === 'couple');
+          case 'unified':
+            return categoryBudgets.filter(b =>
+              b.visibility === 'couple' || (b.owner === currentOwner && b.visibility === 'private')
+            );
+          default:
+            return [];
+        }
       },
       getVisibleTags: () => {
         const { tags, currentOwner, contextMode } = get();
@@ -560,8 +640,60 @@ export const useNexusStore = create<NexusStore>()(
           },
         }),
 
-      // ═══════════ COUPLE HUB ═══════════
-      addExpense: (expense) => set(s => ({ expenses: [...s.expenses, expense] })),
+      // ═══════════ COUPLE HUB & PARTNERSHIP ═══════════
+      createCoupleSpace: (name = 'David & Cami', defaultRatio = { david: 50, cami: 50 }) => {
+        const randomCode = `COUPLE-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+        const newSpace: CoupleSpace = {
+          id: `cs-${Date.now()}`,
+          code: randomCode,
+          status: 'pending',
+          name,
+          user1Id: 'acc-david',
+          user1Name: 'David',
+          defaultSplitRatio: defaultRatio,
+          createdAt: new Date().toISOString(),
+        };
+        set({ coupleSpace: newSpace });
+        return newSpace;
+      },
+      joinCoupleSpace: (code) => {
+        const current = get().coupleSpace;
+        if (!current) {
+          const newSpace: CoupleSpace = {
+            id: `cs-${Date.now()}`,
+            code: code.trim().toUpperCase(),
+            status: 'active',
+            name: 'Nuestro Espacio',
+            user1Id: 'acc-david',
+            user2Id: 'acc-cami',
+            user1Name: 'David',
+            user2Name: 'Cami',
+            defaultSplitRatio: { david: 50, cami: 50 },
+            createdAt: new Date().toISOString(),
+          };
+          set({ coupleSpace: newSpace });
+          return true;
+        }
+        if (current.code.toLowerCase() === code.trim().toLowerCase()) {
+          set({
+            coupleSpace: {
+              ...current,
+              status: 'active',
+              user2Id: 'acc-cami',
+              user2Name: 'Cami',
+            },
+          });
+          return true;
+        }
+        return false;
+      },
+      updateCoupleSpace: (updates) =>
+        set(s => ({
+          coupleSpace: s.coupleSpace ? { ...s.coupleSpace, ...updates } : null,
+        })),
+      unlinkCoupleSpace: () => set({ coupleSpace: null }),
+
+      addExpense: (expense) => set(s => ({ expenses: [expense, ...s.expenses] })),
       updateExpense: (id, updates) =>
         set(s => ({
           expenses: s.expenses.map(e => (e.id === id ? { ...e, ...updates } : e)),
@@ -569,20 +701,79 @@ export const useNexusStore = create<NexusStore>()(
       deleteExpense: (id) => set(s => ({ expenses: s.expenses.filter(e => e.id !== id) })),
       getBalance: () => {
         const expenses = get().expenses;
-        let davidPaid = 0;
-        let camiPaid = 0;
-        expenses.forEach(e => {
-          if (e.paidBy === 'david') davidPaid += e.amount;
-          else camiPaid += e.amount;
+        // Only couple-shared expenses count towards the split/debt balance!
+        const sharedExpenses = expenses.filter(e => e.visibility === 'couple');
+
+        let davidTotalPaid = 0;
+        let camiTotalPaid = 0;
+        let davidOwesCami = 0;
+        let camiOwesDavid = 0;
+
+        sharedExpenses.forEach(e => {
+          const payer = e.paidBy;
+          if (payer === 'david') davidTotalPaid += e.amount;
+          else if (payer === 'cami') camiTotalPaid += e.amount;
+
+          // Determine each person's required share
+          let davidShare = 0;
+          let camiShare = 0;
+
+          if (e.splitType === 'equal' || !e.splitType) {
+            davidShare = e.amount / 2;
+            camiShare = e.amount / 2;
+          } else if (e.splitType === 'percentage' && e.splitRatio) {
+            const dPct = e.splitRatio.david ?? 50;
+            const cPct = e.splitRatio.cami ?? (100 - dPct);
+            davidShare = (e.amount * dPct) / 100;
+            camiShare = (e.amount * cPct) / 100;
+          } else if (e.splitType === 'exact' && e.exactSplit) {
+            davidShare = e.exactSplit.david ?? 0;
+            camiShare = e.exactSplit.cami ?? 0;
+          } else if (e.splitType === 'single') {
+            if (e.singleBeneficiary === 'david') {
+              davidShare = e.amount;
+              camiShare = 0;
+            } else if (e.singleBeneficiary === 'cami') {
+              davidShare = 0;
+              camiShare = e.amount;
+            } else {
+              if (payer === 'david') davidShare = e.amount;
+              else camiShare = e.amount;
+            }
+          }
+
+          // Who owes who?
+          if (payer === 'david') {
+            camiOwesDavid += camiShare;
+          } else if (payer === 'cami') {
+            davidOwesCami += davidShare;
+          }
         });
-        const total = davidPaid + camiPaid;
-        const fairShare = total / 2;
+
+        const net = camiOwesDavid - davidOwesCami;
+
         return {
-          david: davidPaid,
-          cami: camiPaid,
-          net: davidPaid - fairShare, // positive = Cami owes David
+          david: davidTotalPaid,
+          cami: camiTotalPaid,
+          net: Math.round(net),
         };
       },
+
+      addCategoryBudget: (budget) => set(s => ({ categoryBudgets: [...s.categoryBudgets, budget] })),
+      updateCategoryBudget: (id, updates) =>
+        set(s => ({
+          categoryBudgets: s.categoryBudgets.map(b => (b.id === id ? { ...b, ...updates } : b)),
+        })),
+      deleteCategoryBudget: (id) =>
+        set(s => ({ categoryBudgets: s.categoryBudgets.filter(b => b.id !== id) })),
+
+      // ═══════════ INVESTMENTS ($ USD) ═══════════
+      addInvestment: (inv) => set(s => ({ investments: [inv, ...s.investments] })),
+      updateInvestment: (id, updates) =>
+        set(s => ({
+          investments: s.investments.map(i => (i.id === id ? { ...i, ...updates } : i)),
+        })),
+      deleteInvestment: (id) => set(s => ({ investments: s.investments.filter(i => i.id !== id) })),
       addTripPlan: (trip) => set(s => ({ tripPlans: [...s.tripPlans, trip] })),
       updateTripPlan: (id, updates) =>
         set(s => ({
