@@ -4,9 +4,16 @@
 // ═══════════════════════════════════════════════════════════════════
 
 // ─── Core Identity & Privacy ────────────────────────────────────
-export type Owner = 'david' | 'cami';
+export type Owner = 'david' | 'cami' | (string & {});
 export type Visibility = 'private' | 'couple';
 export type ContextMode = 'private' | 'couple' | 'unified';
+
+export interface UserProfile {
+  id: string;
+  email: string;
+  displayName: string;
+  avatar?: string;
+}
 
 export interface PrivacyScope {
   owner: Owner;

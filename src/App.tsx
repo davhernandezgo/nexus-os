@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useNexusStore } from './store/nexusStore';
+import { supabase } from './lib/supabase';
 import LoginScreen from './features/auth/LoginScreen';
 import Sidebar from './components/layout/Sidebar';
 import Header from './components/layout/Header';
@@ -30,6 +31,25 @@ const App: React.FC = () => {
   } = useNexusStore();
 
   const location = useLocation();
+
+  // Sync with Supabase Auth session
+  useEffect(() => {
+    if (supabase) {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session?.user) {
+          useNexusStore.getState().setSupabaseUser(session.user);
+        }
+      });
+
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        if (session?.user) {
+          useNexusStore.getState().setSupabaseUser(session.user);
+        }
+      });
+
+      return () => subscription.unsubscribe();
+    }
+  }, []);
 
   // Global Cmd+K / Ctrl+K keyboard shortcut
   useEffect(() => {

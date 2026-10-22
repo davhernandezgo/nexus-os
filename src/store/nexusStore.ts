@@ -7,13 +7,15 @@ import type {
   Owner, Visibility, ContextMode, Account, Task, Project, Habit,
   TimerSession, TimeLog, Expense, TripPlan, SharedNote, DailyNote,
   NexusNotification, PageBlock, HabitCompletion, Tag, TaskTemplate,
-  CoupleSpace, CategoryBudget, Investment, ExpenseSplitType,
+  CoupleSpace, CategoryBudget, Investment, ExpenseSplitType, UserProfile,
 } from '../types/nexus';
 import { seedData } from '../services/seedData';
+import { supabase } from '../lib/supabase';
 
 // ─── Store Shape ────────────────────────────────────────────────
 export interface NexusStore {
   // Auth / Context
+  currentUser: UserProfile | null;
   currentOwner: Owner | null;
   contextMode: ContextMode;
   accounts: Account[];
@@ -47,6 +49,7 @@ export interface NexusStore {
 
   // ── Auth Actions ──
   login: (owner: Owner, pin: string) => boolean;
+  setSupabaseUser: (user: any) => void;
   logout: () => void;
   switchContext: (mode: ContextMode) => void;
 
@@ -155,6 +158,7 @@ export const useNexusStore = create<NexusStore>()(
   persist(
     (set, get) => ({
       // ── Initial State ──
+      currentUser: null,
       currentOwner: 'david' as Owner,
       contextMode: 'private' as ContextMode,
       accounts: [
@@ -228,7 +232,54 @@ export const useNexusStore = create<NexusStore>()(
         }
         return false;
       },
-      logout: () => set({ currentOwner: null, isAuthenticated: false, contextMode: 'private' }),
+      setSupabaseUser: (user) => {
+        if (!user) {
+          set({ currentUser: null, isAuthenticated: false });
+          return;
+        }
+        const email = user.email || '';
+        const fullName =
+          user.user_metadata?.full_name ||
+          user.user_metadata?.name ||
+          user.user_metadata?.display_name ||
+          email.split('@')[0] ||
+          'Usuario';
+        const avatar = user.user_metadata?.avatar_url || '👤';
+        const isCami = email.toLowerCase().includes('cami');
+        const ownerKey: Owner = isCami ? 'cami' : 'david';
+
+        const accounts = get().accounts;
+        const existingAcc = accounts.find(a => a.id === user.id || a.owner === ownerKey);
+        const userAccount: Account = {
+          id: user.id,
+          owner: ownerKey,
+          displayName: fullName,
+          avatar,
+          pin: '0000',
+          accentColor: isCami ? '#ec4899' : '#6366f1',
+        };
+
+        set({
+          currentUser: {
+            id: user.id,
+            email,
+            displayName: fullName,
+            avatar,
+          },
+          currentOwner: ownerKey,
+          isAuthenticated: true,
+          contextMode: 'private',
+          accounts: existingAcc
+            ? accounts.map(a => (a.owner === ownerKey ? { ...a, displayName: fullName, avatar } : a))
+            : [userAccount, ...accounts],
+        });
+      },
+      logout: () => {
+        if (supabase) {
+          supabase.auth.signOut().catch(() => {});
+        }
+        set({ currentOwner: null, currentUser: null, isAuthenticated: false, contextMode: 'private' });
+      },
       switchContext: (mode) => set({ contextMode: mode }),
 
       // ═══════════ PRIVACY FILTER ═══════════

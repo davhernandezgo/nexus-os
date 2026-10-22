@@ -24,7 +24,7 @@ import {
   Users,
 } from 'lucide-react';
 import { useNexusStore } from '../../store/nexusStore';
-import type { Task, Habit, Priority } from '../../types/nexus';
+import type { Task, Habit, Priority, Owner } from '../../types/nexus';
 import ExpenseTracker from './ExpenseTracker';
 import TripPlanner from './TripPlanner';
 import SharedBoard from './SharedBoard';
@@ -84,7 +84,7 @@ export default function CoupleHub() {
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [newTaskPriority, setNewTaskPriority] = useState<Priority>('P2');
   const [newTaskDueDate, setNewTaskDueDate] = useState('');
-  const [newTaskAssignee, setNewTaskAssignee] = useState<'david' | 'cami'>(currentOwner || 'david');
+  const [newTaskAssignee, setNewTaskAssignee] = useState<Owner>(currentOwner || 'david');
 
   // Habit tab state
   const [showAddHabitModal, setShowAddHabitModal] = useState(false);
@@ -867,7 +867,7 @@ export default function CoupleHub() {
                     </label>
                     <select
                       value={newTaskAssignee}
-                      onChange={e => setNewTaskAssignee(e.target.value as 'david' | 'cami')}
+                      onChange={e => setNewTaskAssignee(e.target.value as Owner)}
                       className="w-full px-3 py-2 rounded-xl bg-nexus-surface-2 border border-nexus-border text-xs text-nexus-text focus:outline-none focus:border-nexus-accent-indigo"
                     >
                       <option value="david">👨‍💻 David</option>
