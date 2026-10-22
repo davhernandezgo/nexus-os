@@ -6,20 +6,49 @@
 -- Enable required extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- ─── Custom Types ───────────────────────────────────────────────
-CREATE TYPE owner_type AS ENUM ('david', 'cami');
-CREATE TYPE visibility_type AS ENUM ('private', 'couple');
-CREATE TYPE priority_type AS ENUM ('P1', 'P2', 'P3', 'P4');
-CREATE TYPE task_status AS ENUM ('todo', 'in_progress', 'blocked', 'done');
-CREATE TYPE block_type AS ENUM (
-  'paragraph', 'heading1', 'heading2', 'heading3',
-  'bullet_list', 'numbered_list', 'todo', 'code',
-  'table', 'callout', 'divider', 'timestamp', 'wikilink'
-);
-CREATE TYPE notification_level AS ENUM ('info', 'warning', 'urgent', 'overdue');
+-- ─── Custom Types (Idempotent) ──────────────────────────────────
+DO $$ BEGIN
+  CREATE TYPE owner_type AS ENUM ('david', 'cami');
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE TYPE visibility_type AS ENUM ('private', 'couple');
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE TYPE priority_type AS ENUM ('P1', 'P2', 'P3', 'P4');
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE TYPE task_status AS ENUM ('todo', 'in_progress', 'blocked', 'done');
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE TYPE block_type AS ENUM (
+    'paragraph', 'heading1', 'heading2', 'heading3',
+    'bullet_list', 'numbered_list', 'todo', 'code',
+    'table', 'callout', 'divider', 'timestamp', 'wikilink'
+  );
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE TYPE notification_level AS ENUM ('info', 'warning', 'urgent', 'overdue');
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
 -- ─── Profiles (linked to Supabase Auth) ─────────────────────────
-CREATE TABLE profiles (
+CREATE TABLE IF NOT EXISTS profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   owner owner_type NOT NULL UNIQUE,
   display_name TEXT NOT NULL,
@@ -29,7 +58,7 @@ CREATE TABLE profiles (
 );
 
 -- ─── Projects ───────────────────────────────────────────────────
-CREATE TABLE projects (
+CREATE TABLE IF NOT EXISTS projects (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name TEXT NOT NULL,
   emoji TEXT DEFAULT '📁',
@@ -42,7 +71,7 @@ CREATE TABLE projects (
 );
 
 -- ─── Tasks (and Subtasks via parent_task_id) ────────────────────
-CREATE TABLE tasks (
+CREATE TABLE IF NOT EXISTS tasks (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   title TEXT NOT NULL,
   description TEXT DEFAULT '',
@@ -78,16 +107,16 @@ CREATE TABLE tasks (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_tasks_owner ON tasks(owner);
-CREATE INDEX idx_tasks_visibility ON tasks(visibility);
-CREATE INDEX idx_tasks_status ON tasks(status);
-CREATE INDEX idx_tasks_priority ON tasks(priority);
-CREATE INDEX idx_tasks_due_date ON tasks(due_date);
-CREATE INDEX idx_tasks_parent ON tasks(parent_task_id);
-CREATE INDEX idx_tasks_project ON tasks(project_id);
+CREATE INDEX IF NOT EXISTS idx_tasks_owner ON tasks(owner);
+CREATE INDEX IF NOT EXISTS idx_tasks_visibility ON tasks(visibility);
+CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
+CREATE INDEX IF NOT EXISTS idx_tasks_priority ON tasks(priority);
+CREATE INDEX IF NOT EXISTS idx_tasks_due_date ON tasks(due_date);
+CREATE INDEX IF NOT EXISTS idx_tasks_parent ON tasks(parent_task_id);
+CREATE INDEX IF NOT EXISTS idx_tasks_project ON tasks(project_id);
 
 -- ─── Tags ───────────────────────────────────────────────────────
-CREATE TABLE tags (
+CREATE TABLE IF NOT EXISTS tags (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name TEXT NOT NULL,
   color TEXT DEFAULT '#6366f1',
@@ -97,7 +126,7 @@ CREATE TABLE tags (
 );
 
 -- ─── Habits ─────────────────────────────────────────────────────
-CREATE TABLE habits (
+CREATE TABLE IF NOT EXISTS habits (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name TEXT NOT NULL,
   icon TEXT DEFAULT '✅',
@@ -111,7 +140,7 @@ CREATE TABLE habits (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE habit_completions (
+CREATE TABLE IF NOT EXISTS habit_completions (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   habit_id UUID NOT NULL REFERENCES habits(id) ON DELETE CASCADE,
   date DATE NOT NULL,
@@ -120,11 +149,11 @@ CREATE TABLE habit_completions (
   UNIQUE(habit_id, date)
 );
 
-CREATE INDEX idx_habit_completions_habit ON habit_completions(habit_id);
-CREATE INDEX idx_habit_completions_date ON habit_completions(date);
+CREATE INDEX IF NOT EXISTS idx_habit_completions_habit ON habit_completions(habit_id);
+CREATE INDEX IF NOT EXISTS idx_habit_completions_date ON habit_completions(date);
 
 -- ─── Time Logs ──────────────────────────────────────────────────
-CREATE TABLE time_logs (
+CREATE TABLE IF NOT EXISTS time_logs (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   task_id UUID NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
   owner owner_type NOT NULL,
@@ -136,7 +165,7 @@ CREATE TABLE time_logs (
 );
 
 -- ─── Couple Spaces (Multi-user Couple Hub Pairing) ──────────────
-CREATE TABLE couple_spaces (
+CREATE TABLE IF NOT EXISTS couple_spaces (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   code TEXT NOT NULL UNIQUE,
   status TEXT NOT NULL DEFAULT 'pending', -- 'pending' | 'active'
@@ -150,7 +179,7 @@ CREATE TABLE couple_spaces (
 );
 
 -- ─── Expenses (Personal & Couple Hub with Custom Split) ──────────
-CREATE TABLE expenses (
+CREATE TABLE IF NOT EXISTS expenses (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   description TEXT NOT NULL,
   amount DECIMAL(12,2) NOT NULL,
@@ -169,7 +198,7 @@ CREATE TABLE expenses (
 );
 
 -- ─── Category Budgets (Monthly Expense Targets) ─────────────────
-CREATE TABLE category_budgets (
+CREATE TABLE IF NOT EXISTS category_budgets (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   category TEXT NOT NULL,
   monthly_limit DECIMAL(12,2) NOT NULL,
@@ -180,7 +209,7 @@ CREATE TABLE category_budgets (
 );
 
 -- ─── Investments ($ USD Personal & Pareja) ───────────────────────
-CREATE TABLE investments (
+CREATE TABLE IF NOT EXISTS investments (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   asset TEXT NOT NULL,
   amount_usd DECIMAL(12,2) NOT NULL,
@@ -197,7 +226,7 @@ CREATE TABLE investments (
 );
 
 -- ─── Trip Plans (Couple Hub) ────────────────────────────────────
-CREATE TABLE trip_plans (
+CREATE TABLE IF NOT EXISTS trip_plans (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   title TEXT NOT NULL,
   emoji TEXT DEFAULT '✈️',
@@ -213,7 +242,7 @@ CREATE TABLE trip_plans (
 );
 
 -- ─── Shared Notes (Couple Hub) ──────────────────────────────────
-CREATE TABLE shared_notes (
+CREATE TABLE IF NOT EXISTS shared_notes (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   title TEXT NOT NULL,
   content TEXT DEFAULT '',
@@ -224,7 +253,7 @@ CREATE TABLE shared_notes (
 );
 
 -- ─── Daily Notes ────────────────────────────────────────────────
-CREATE TABLE daily_notes (
+CREATE TABLE IF NOT EXISTS daily_notes (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   date DATE NOT NULL,
   owner owner_type NOT NULL,
@@ -236,7 +265,7 @@ CREATE TABLE daily_notes (
 );
 
 -- ─── Notifications ──────────────────────────────────────────────
-CREATE TABLE notifications (
+CREATE TABLE IF NOT EXISTS notifications (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   title TEXT NOT NULL,
   body TEXT DEFAULT '',
@@ -259,7 +288,7 @@ RETURNS owner_type AS $$
   SELECT owner FROM profiles WHERE id = auth.uid();
 $$ LANGUAGE sql SECURITY DEFINER STABLE;
 
--- ─── Enable RLS on all tables ───────────────────────────────────
+-- Enable RLS on all tables
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tasks ENABLE ROW LEVEL SECURITY;
@@ -276,187 +305,145 @@ ALTER TABLE shared_notes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE daily_notes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 
--- ─── Profiles: user can only read/update their own ──────────────
-CREATE POLICY profiles_select ON profiles FOR SELECT
-  USING (id = auth.uid());
-CREATE POLICY profiles_update ON profiles FOR UPDATE
-  USING (id = auth.uid());
+-- Drop existing policies if re-running
+DROP POLICY IF EXISTS profiles_select ON profiles;
+DROP POLICY IF EXISTS profiles_update ON profiles;
+DROP POLICY IF EXISTS projects_select ON projects;
+DROP POLICY IF EXISTS projects_insert ON projects;
+DROP POLICY IF EXISTS projects_update ON projects;
+DROP POLICY IF EXISTS projects_delete ON projects;
+DROP POLICY IF EXISTS tasks_select ON tasks;
+DROP POLICY IF EXISTS tasks_insert ON tasks;
+DROP POLICY IF EXISTS tasks_update ON tasks;
+DROP POLICY IF EXISTS tasks_delete ON tasks;
+DROP POLICY IF EXISTS tags_select ON tags;
+DROP POLICY IF EXISTS tags_insert ON tags;
+DROP POLICY IF EXISTS habits_select ON habits;
+DROP POLICY IF EXISTS habits_insert ON habits;
+DROP POLICY IF EXISTS habits_update ON habits;
+DROP POLICY IF EXISTS habits_delete ON habits;
+DROP POLICY IF EXISTS habit_completions_select ON habit_completions;
+DROP POLICY IF EXISTS habit_completions_insert ON habit_completions;
+DROP POLICY IF EXISTS time_logs_select ON time_logs;
+DROP POLICY IF EXISTS time_logs_insert ON time_logs;
+DROP POLICY IF EXISTS couple_spaces_all ON couple_spaces;
+DROP POLICY IF EXISTS expenses_select ON expenses;
+DROP POLICY IF EXISTS expenses_insert ON expenses;
+DROP POLICY IF EXISTS expenses_update ON expenses;
+DROP POLICY IF EXISTS expenses_delete ON expenses;
+DROP POLICY IF EXISTS category_budgets_select ON category_budgets;
+DROP POLICY IF EXISTS category_budgets_insert ON category_budgets;
+DROP POLICY IF EXISTS category_budgets_update ON category_budgets;
+DROP POLICY IF EXISTS category_budgets_delete ON category_budgets;
+DROP POLICY IF EXISTS investments_select ON investments;
+DROP POLICY IF EXISTS investments_insert ON investments;
+DROP POLICY IF EXISTS investments_update ON investments;
+DROP POLICY IF EXISTS investments_delete ON investments;
+DROP POLICY IF EXISTS trip_plans_all ON trip_plans;
+DROP POLICY IF EXISTS shared_notes_all ON shared_notes;
+DROP POLICY IF EXISTS daily_notes_select ON daily_notes;
+DROP POLICY IF EXISTS daily_notes_insert ON daily_notes;
+DROP POLICY IF EXISTS daily_notes_update ON daily_notes;
+DROP POLICY IF EXISTS notifications_select ON notifications;
+DROP POLICY IF EXISTS notifications_insert ON notifications;
+DROP POLICY IF EXISTS notifications_update ON notifications;
 
--- ─── Projects: owner sees private + both see couple ─────────────
-CREATE POLICY projects_select ON projects FOR SELECT
-  USING (
-    visibility = 'couple'
-    OR owner = get_user_owner()
-  );
-CREATE POLICY projects_insert ON projects FOR INSERT
-  WITH CHECK (owner = get_user_owner());
-CREATE POLICY projects_update ON projects FOR UPDATE
-  USING (
-    visibility = 'couple'
-    OR owner = get_user_owner()
-  );
-CREATE POLICY projects_delete ON projects FOR DELETE
-  USING (owner = get_user_owner());
+-- Create policies
+CREATE POLICY profiles_select ON profiles FOR SELECT USING (id = auth.uid());
+CREATE POLICY profiles_update ON profiles FOR UPDATE USING (id = auth.uid());
 
--- ─── Tasks: same pattern — private only by owner, couple by both ─
-CREATE POLICY tasks_select ON tasks FOR SELECT
-  USING (
-    visibility = 'couple'
-    OR owner = get_user_owner()
-  );
-CREATE POLICY tasks_insert ON tasks FOR INSERT
-  WITH CHECK (owner = get_user_owner());
-CREATE POLICY tasks_update ON tasks FOR UPDATE
-  USING (
-    visibility = 'couple'
-    OR owner = get_user_owner()
-  );
-CREATE POLICY tasks_delete ON tasks FOR DELETE
-  USING (owner = get_user_owner());
+CREATE POLICY projects_select ON projects FOR SELECT USING (visibility = 'couple' OR owner = get_user_owner());
+CREATE POLICY projects_insert ON projects FOR INSERT WITH CHECK (owner = get_user_owner());
+CREATE POLICY projects_update ON projects FOR UPDATE USING (visibility = 'couple' OR owner = get_user_owner());
+CREATE POLICY projects_delete ON projects FOR DELETE USING (owner = get_user_owner());
 
--- ─── Tags ───────────────────────────────────────────────────────
-CREATE POLICY tags_select ON tags FOR SELECT
-  USING (
-    visibility = 'couple'
-    OR owner = get_user_owner()
-  );
-CREATE POLICY tags_insert ON tags FOR INSERT
-  WITH CHECK (owner = get_user_owner());
+CREATE POLICY tasks_select ON tasks FOR SELECT USING (visibility = 'couple' OR owner = get_user_owner());
+CREATE POLICY tasks_insert ON tasks FOR INSERT WITH CHECK (owner = get_user_owner());
+CREATE POLICY tasks_update ON tasks FOR UPDATE USING (visibility = 'couple' OR owner = get_user_owner());
+CREATE POLICY tasks_delete ON tasks FOR DELETE USING (owner = get_user_owner());
 
--- ─── Habits ─────────────────────────────────────────────────────
-CREATE POLICY habits_select ON habits FOR SELECT
-  USING (
-    visibility = 'couple'
-    OR owner = get_user_owner()
-  );
-CREATE POLICY habits_insert ON habits FOR INSERT
-  WITH CHECK (owner = get_user_owner());
-CREATE POLICY habits_update ON habits FOR UPDATE
-  USING (
-    visibility = 'couple'
-    OR owner = get_user_owner()
-  );
-CREATE POLICY habits_delete ON habits FOR DELETE
-  USING (owner = get_user_owner());
+CREATE POLICY tags_select ON tags FOR SELECT USING (visibility = 'couple' OR owner = get_user_owner());
+CREATE POLICY tags_insert ON tags FOR INSERT WITH CHECK (owner = get_user_owner());
 
--- ─── Habit Completions: via habit ownership ─────────────────────
-CREATE POLICY habit_completions_select ON habit_completions FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM habits h
-      WHERE h.id = habit_completions.habit_id
-      AND (h.visibility = 'couple' OR h.owner = get_user_owner())
-    )
-  );
-CREATE POLICY habit_completions_insert ON habit_completions FOR INSERT
-  WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM habits h
-      WHERE h.id = habit_completions.habit_id
-      AND (h.visibility = 'couple' OR h.owner = get_user_owner())
-    )
-  );
+CREATE POLICY habits_select ON habits FOR SELECT USING (visibility = 'couple' OR owner = get_user_owner());
+CREATE POLICY habits_insert ON habits FOR INSERT WITH CHECK (owner = get_user_owner());
+CREATE POLICY habits_update ON habits FOR UPDATE USING (visibility = 'couple' OR owner = get_user_owner());
+CREATE POLICY habits_delete ON habits FOR DELETE USING (owner = get_user_owner());
 
--- ─── Time Logs: owner only ──────────────────────────────────────
-CREATE POLICY time_logs_select ON time_logs FOR SELECT
-  USING (owner = get_user_owner());
-CREATE POLICY time_logs_insert ON time_logs FOR INSERT
-  WITH CHECK (owner = get_user_owner());
+CREATE POLICY habit_completions_select ON habit_completions FOR SELECT USING (
+  EXISTS (SELECT 1 FROM habits h WHERE h.id = habit_completions.habit_id AND (h.visibility = 'couple' OR h.owner = get_user_owner()))
+);
+CREATE POLICY habit_completions_insert ON habit_completions FOR INSERT WITH CHECK (
+  EXISTS (SELECT 1 FROM habits h WHERE h.id = habit_completions.habit_id AND (h.visibility = 'couple' OR h.owner = get_user_owner()))
+);
 
--- ─── Couple Spaces: visible to members ──────────────────────────
-CREATE POLICY couple_spaces_all ON couple_spaces FOR ALL
-  USING (TRUE)
-  WITH CHECK (TRUE);
+CREATE POLICY time_logs_select ON time_logs FOR SELECT USING (owner = get_user_owner());
+CREATE POLICY time_logs_insert ON time_logs FOR INSERT WITH CHECK (owner = get_user_owner());
 
--- ─── Expenses: owner sees private + both see couple ─────────────
-CREATE POLICY expenses_select ON expenses FOR SELECT
-  USING (
-    visibility = 'couple'
-    OR owner = get_user_owner()
-    OR paid_by = get_user_owner()
-  );
-CREATE POLICY expenses_insert ON expenses FOR INSERT
-  WITH CHECK (owner = get_user_owner() OR paid_by = get_user_owner());
-CREATE POLICY expenses_update ON expenses FOR UPDATE
-  USING (
-    visibility = 'couple'
-    OR owner = get_user_owner()
-  );
-CREATE POLICY expenses_delete ON expenses FOR DELETE
-  USING (
-    visibility = 'couple'
-    OR owner = get_user_owner()
-  );
+CREATE POLICY couple_spaces_all ON couple_spaces FOR ALL USING (TRUE) WITH CHECK (TRUE);
 
--- ─── Category Budgets: monthly limits per category ──────────────
-CREATE POLICY category_budgets_select ON category_budgets FOR SELECT
-  USING (
-    visibility = 'couple'
-    OR owner = get_user_owner()
-  );
-CREATE POLICY category_budgets_insert ON category_budgets FOR INSERT
-  WITH CHECK (owner = get_user_owner());
-CREATE POLICY category_budgets_update ON category_budgets FOR UPDATE
-  USING (
-    visibility = 'couple'
-    OR owner = get_user_owner()
-  );
-CREATE POLICY category_budgets_delete ON category_budgets FOR DELETE
-  USING (owner = get_user_owner());
+CREATE POLICY expenses_select ON expenses FOR SELECT USING (
+  visibility = 'couple' OR owner = get_user_owner() OR paid_by = get_user_owner()
+);
+CREATE POLICY expenses_insert ON expenses FOR INSERT WITH CHECK (owner = get_user_owner() OR paid_by = get_user_owner());
+CREATE POLICY expenses_update ON expenses FOR UPDATE USING (visibility = 'couple' OR owner = get_user_owner());
+CREATE POLICY expenses_delete ON expenses FOR DELETE USING (visibility = 'couple' OR owner = get_user_owner());
 
--- ─── Investments ($ USD): personal or couple ────────────────────
-CREATE POLICY investments_select ON investments FOR SELECT
-  USING (
-    visibility = 'couple'
-    OR owner = get_user_owner()
-  );
-CREATE POLICY investments_insert ON investments FOR INSERT
-  WITH CHECK (owner = get_user_owner());
-CREATE POLICY investments_update ON investments FOR UPDATE
-  USING (
-    visibility = 'couple'
-    OR owner = get_user_owner()
-  );
-CREATE POLICY investments_delete ON investments FOR DELETE
-  USING (owner = get_user_owner());
+CREATE POLICY category_budgets_select ON category_budgets FOR SELECT USING (visibility = 'couple' OR owner = get_user_owner());
+CREATE POLICY category_budgets_insert ON category_budgets FOR INSERT WITH CHECK (owner = get_user_owner());
+CREATE POLICY category_budgets_update ON category_budgets FOR UPDATE USING (visibility = 'couple' OR owner = get_user_owner());
+CREATE POLICY category_budgets_delete ON category_budgets FOR DELETE USING (owner = get_user_owner());
 
--- ─── Trip Plans: always visible to both ─────────────────────────
-CREATE POLICY trip_plans_all ON trip_plans FOR ALL
-  USING (TRUE)
-  WITH CHECK (TRUE);
+CREATE POLICY investments_select ON investments FOR SELECT USING (visibility = 'couple' OR owner = get_user_owner());
+CREATE POLICY investments_insert ON investments FOR INSERT WITH CHECK (owner = get_user_owner());
+CREATE POLICY investments_update ON investments FOR UPDATE USING (visibility = 'couple' OR owner = get_user_owner());
+CREATE POLICY investments_delete ON investments FOR DELETE USING (owner = get_user_owner());
 
--- ─── Shared Notes: always visible to both ───────────────────────
-CREATE POLICY shared_notes_all ON shared_notes FOR ALL
-  USING (TRUE)
-  WITH CHECK (TRUE);
+CREATE POLICY trip_plans_all ON trip_plans FOR ALL USING (TRUE) WITH CHECK (TRUE);
+CREATE POLICY shared_notes_all ON shared_notes FOR ALL USING (TRUE) WITH CHECK (TRUE);
 
--- ─── Daily Notes: owner only ────────────────────────────────────
-CREATE POLICY daily_notes_select ON daily_notes FOR SELECT
-  USING (owner = get_user_owner());
-CREATE POLICY daily_notes_insert ON daily_notes FOR INSERT
-  WITH CHECK (owner = get_user_owner());
-CREATE POLICY daily_notes_update ON daily_notes FOR UPDATE
-  USING (owner = get_user_owner());
+CREATE POLICY daily_notes_select ON daily_notes FOR SELECT USING (owner = get_user_owner());
+CREATE POLICY daily_notes_insert ON daily_notes FOR INSERT WITH CHECK (owner = get_user_owner());
+CREATE POLICY daily_notes_update ON daily_notes FOR UPDATE USING (owner = get_user_owner());
 
--- ─── Notifications: owner only ──────────────────────────────────
-CREATE POLICY notifications_select ON notifications FOR SELECT
-  USING (owner = get_user_owner());
-CREATE POLICY notifications_insert ON notifications FOR INSERT
-  WITH CHECK (owner = get_user_owner());
-CREATE POLICY notifications_update ON notifications FOR UPDATE
-  USING (owner = get_user_owner());
+CREATE POLICY notifications_select ON notifications FOR SELECT USING (owner = get_user_owner());
+CREATE POLICY notifications_insert ON notifications FOR INSERT WITH CHECK (owner = get_user_owner());
+CREATE POLICY notifications_update ON notifications FOR UPDATE USING (owner = get_user_owner());
 
 -- ═══════════════════════════════════════════════════════════════════
--- REALTIME SUBSCRIPTIONS (enable for collaborative couple features)
+-- REALTIME SUBSCRIPTIONS
 -- ═══════════════════════════════════════════════════════════════════
-ALTER PUBLICATION supabase_realtime ADD TABLE tasks;
-ALTER PUBLICATION supabase_realtime ADD TABLE expenses;
-ALTER PUBLICATION supabase_realtime ADD TABLE couple_spaces;
-ALTER PUBLICATION supabase_realtime ADD TABLE category_budgets;
-ALTER PUBLICATION supabase_realtime ADD TABLE investments;
-ALTER PUBLICATION supabase_realtime ADD TABLE shared_notes;
-ALTER PUBLICATION supabase_realtime ADD TABLE habit_completions;
-ALTER PUBLICATION supabase_realtime ADD TABLE notifications;
+DO $$ BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE tasks;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE expenses;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE couple_spaces;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE category_budgets;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE investments;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE shared_notes;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE habit_completions;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE notifications;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- ─── Automatic updated_at trigger ───────────────────────────────
 CREATE OR REPLACE FUNCTION update_updated_at()
@@ -467,11 +454,14 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER tasks_updated_at BEFORE UPDATE ON tasks
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-CREATE TRIGGER projects_updated_at BEFORE UPDATE ON projects
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-CREATE TRIGGER shared_notes_updated_at BEFORE UPDATE ON shared_notes
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-CREATE TRIGGER daily_notes_updated_at BEFORE UPDATE ON daily_notes
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+DROP TRIGGER IF EXISTS tasks_updated_at ON tasks;
+CREATE TRIGGER tasks_updated_at BEFORE UPDATE ON tasks FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+DROP TRIGGER IF EXISTS projects_updated_at ON projects;
+CREATE TRIGGER projects_updated_at BEFORE UPDATE ON projects FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+DROP TRIGGER IF EXISTS shared_notes_updated_at ON shared_notes;
+CREATE TRIGGER shared_notes_updated_at BEFORE UPDATE ON shared_notes FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+DROP TRIGGER IF EXISTS daily_notes_updated_at ON daily_notes;
+CREATE TRIGGER daily_notes_updated_at BEFORE UPDATE ON daily_notes FOR EACH ROW EXECUTE FUNCTION update_updated_at();
