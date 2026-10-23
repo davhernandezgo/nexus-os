@@ -642,7 +642,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ taskId, onClose }) =>
               </div>
             </div>
 
-            {/* Notion Properties Grid */}
+            {/* Properties Grid */}
             <div className="bg-nexus-surface-2/60 border border-nexus-border rounded-2xl p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-xs shadow-inner">
               {/* Status */}
               <div className="space-y-1.5">
@@ -905,15 +905,15 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ taskId, onClose }) =>
               </div>
             </div>
 
-            {/* ── NOTION / OBSIDIAN DOCUMENT STUDIO (HOJA LIBRE & BLOQUES) ── */}
+            {/* ── DOCUMENT STUDIO (HOJA LIBRE & BLOQUES) ── */}
             <div className="pt-4 border-t border-nexus-border space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-2 flex-wrap">
                   <FileText className="w-4 h-4 text-indigo-400" />
                   <h3 className="text-sm font-bold text-nexus-text">
                     {task.parentTaskId
-                      ? 'Hoja Notion de la Subtarea'
-                      : 'Hoja Notion de la Tarea'}
+                      ? 'Documento de la subtarea'
+                      : 'Documento de la tarea'}
                   </h3>
                   {currentProject && (
                     <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-nexus-surface-3 text-nexus-text-secondary border border-nexus-border flex items-center gap-1">
@@ -1018,7 +1018,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ taskId, onClose }) =>
                                   onClick={handleOpenCreateBlankTemplate}
                                   className="px-3 py-1.5 rounded-xl bg-indigo-600 text-white text-xs font-semibold"
                                 >
-                                  + Crear tu primera plantilla
+                                  Crear tu primera plantilla
                                 </button>
                               )}
                             </div>
@@ -1079,7 +1079,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ taskId, onClose }) =>
                     )}
                   </div>
 
-                  {/* Mode Switcher: Bloques Notion vs Hoja Infinita (Markdown) */}
+                  {/* Mode Switcher: Bloques vs Markdown */}
                   <div className="flex items-center gap-1 bg-nexus-surface-2 p-1 rounded-xl border border-nexus-border text-xs">
                     <button
                       type="button"
@@ -1095,7 +1095,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ taskId, onClose }) =>
                       }`}
                     >
                       <Layers className="w-3.5 h-3.5 text-indigo-400" />
-                      <span>Bloques Notion</span>
+                      <span>Bloques</span>
                     </button>
                     <button
                       type="button"
@@ -1112,7 +1112,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ taskId, onClose }) =>
                       }`}
                     >
                       <FileText className="w-3.5 h-3.5 text-pink-400" />
-                      <span>Hoja Infinita (Markdown)</span>
+                      <span>Markdown</span>
                     </button>
                   </div>
                 </div>
@@ -1124,7 +1124,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ taskId, onClose }) =>
                   value={markdownText}
                   onChange={handleMarkdownChange}
                   onBlur={handleFlushMarkdown}
-                  placeholder="Escribe libremente aquí como en Notion o Word... Usa encabezados (#), listas (- [ ]), código (```), tablas o [[WikiLinks]]. Escribe / para comandos."
+                  placeholder="Escribe libremente aquí... Usa encabezados (#), listas (- [ ]), código (```), tablas o [[WikiLinks]]. Escribe / para comandos."
                   minHeight="360px"
                   contextTitle={task.title}
                   onWikiLinkClick={(wikiTitle) => {
@@ -1134,7 +1134,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ taskId, onClose }) =>
                 />
               )}
 
-              {/* 2. MODO BLOQUES NOTION INTERACTIVOS */}
+              {/* 2. MODO BLOQUES INTERACTIVOS */}
               {editorMode === 'blocks' && (
                 <div className="space-y-3">
                   {(!task.pageContent || task.pageContent.length === 0) ? (

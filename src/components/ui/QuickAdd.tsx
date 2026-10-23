@@ -478,7 +478,7 @@ const QuickAdd: React.FC = () => {
                 title={
                   input.trim()
                     ? 'Crear rápido con NLP (Enter)'
-                    : 'Abrir creador completo de tarea con hoja Notion'
+                    : 'Abrir creador completo de tarea'
                 }
               >
                 <Plus className="w-4 h-4 stroke-[2.5]" />
@@ -490,7 +490,7 @@ const QuickAdd: React.FC = () => {
               type="button"
               onClick={() => setShowModal(true)}
               className="flex items-center gap-1.5 px-3 sm:px-4 py-2.5 rounded-xl bg-gradient-to-r from-nexus-accent-indigo to-indigo-600 hover:opacity-95 text-white text-xs font-semibold shrink-0 shadow-sm transition active:scale-95 cursor-pointer"
-              title="Crear nueva tarea con hoja Notion integrada"
+              title="Crear nueva tarea"
             >
               <Plus className="w-4 h-4" />
               <span className="hidden xs:inline">Nueva Tarea</span>
@@ -626,10 +626,10 @@ const QuickAdd: React.FC = () => {
                       setCreatedFeedback(null);
                     }}
                     className="px-2.5 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-bold text-[11px] flex items-center gap-1 transition shadow-xs cursor-pointer"
-                    title="Abrir hoja de tarea en Notion Studio"
+                    title="Abrir documento de la tarea"
                   >
                     <FileText className="w-3.5 h-3.5" />
-                    <span>Abrir Hoja</span>
+                    <span>Abrir Documento</span>
                   </button>
                   <button
                     type="button"

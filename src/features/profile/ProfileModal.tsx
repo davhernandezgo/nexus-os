@@ -19,9 +19,27 @@ import {
 import { useNexusStore } from '../../store/nexusStore';
 import { useNavigate } from 'react-router-dom';
 
-const EMOJI_PRESETS = [
-  '👨‍💻', '👩‍🎨', '🚀', '⚡', '🧘', '🎨', '💼', '🌟',
-  '🦊', '🦉', '🦁', '🐼', '☕', '🎯', '💎', '🥑',
+const EMOJI_CATEGORIES: { name: string; emojis: string[] }[] = [
+  {
+    name: 'Personas',
+    emojis: ['👨‍💻', '👩‍💻', '🧑‍💻', '👨‍🎨', '👩‍🎨', '🧑‍💼', '👩‍🔬', '👨‍🚀', '🥷', '🧙‍♂️', '🦸', '🕵️', '🧑‍🍳', '🏃', '🧗', '🏄'],
+  },
+  {
+    name: 'Tecnología',
+    emojis: ['🚀', '⚡', '💻', '🛸', '🪐', '🛰️', '🔬', '🔭', '💡', '⚙️', '🔋', '📡', '🤖', '🎮', '🕹️', '🌐'],
+  },
+  {
+    name: 'Animales',
+    emojis: ['🦊', '🦉', '🦁', '🐼', '🐺', '🐯', '🦅', '🐬', '🐨', '🦄', '🐝', '🐙', '🌿', '🌸', '🌲', '🍀'],
+  },
+  {
+    name: 'Estilo de vida',
+    emojis: ['🎯', '💎', '🌟', '☕', '🥑', '🍕', '📚', '🏆', '🧘', '🏖️', '✈️', '🎵', '🎸', '🏋️', '🧭', '⏱️'],
+  },
+  {
+    name: 'Símbolos',
+    emojis: ['✨', '🔥', '🌈', '☀️', '🌙', '🔮', '🛡️', '⚓', '🔑', '🎨', '🧩', '🏷️', '💫', '🤍', '⭐', '📦'],
+  },
 ];
 
 const ACCENT_COLORS = [
@@ -55,6 +73,7 @@ export const ProfileModal: React.FC = () => {
   const [displayName, setDisplayName] = useState('');
   const [avatar, setAvatar] = useState('👤');
   const [accentColor, setAccentColor] = useState('#6366f1');
+  const [selectedCategory, setSelectedCategory] = useState(0);
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -185,7 +204,7 @@ export const ProfileModal: React.FC = () => {
             </div>
 
             {/* Avatar Selector */}
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               <label className="text-xs font-semibold text-nexus-text flex items-center justify-between">
                 <span className="flex items-center gap-2">
                   <Camera className="w-3.5 h-3.5 text-pink-400" />
@@ -202,9 +221,27 @@ export const ProfileModal: React.FC = () => {
                 )}
               </label>
 
+              {/* Category Tabs */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+                {EMOJI_CATEGORIES.map((category, idx) => (
+                  <button
+                    key={category.name}
+                    type="button"
+                    onClick={() => setSelectedCategory(idx)}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-medium whitespace-nowrap transition ${
+                      selectedCategory === idx
+                        ? 'bg-nexus-surface-3 text-nexus-text border border-nexus-border shadow-sm'
+                        : 'text-nexus-text-muted hover:text-nexus-text hover:bg-nexus-surface-2'
+                    }`}
+                  >
+                    {category.name}
+                  </button>
+                ))}
+              </div>
+
               {/* Emoji Presets Grid */}
               <div className="grid grid-cols-8 gap-1.5 p-2 rounded-2xl bg-nexus-surface-2 border border-nexus-border">
-                {EMOJI_PRESETS.map(emoji => (
+                {EMOJI_CATEGORIES[selectedCategory].emojis.map(emoji => (
                   <button
                     key={emoji}
                     type="button"
@@ -322,14 +359,14 @@ export const ProfileModal: React.FC = () => {
               </button>
             </div>
 
-            {/* Danger Zone: Eliminar Cuenta & Empezar de Cero */}
+            {/* Eliminar Cuenta */}
             <div className="p-4 rounded-2xl bg-rose-500/5 border border-rose-500/20 space-y-3">
               <div className="flex items-start gap-2.5">
                 <AlertTriangle className="w-4 h-4 text-rose-400 mt-0.5 shrink-0" />
                 <div>
-                  <h4 className="text-xs font-bold text-rose-400">Zona de Peligro: Reiniciar / Eliminar Cuenta</h4>
+                  <h4 className="text-xs font-bold text-rose-400">Eliminar cuenta</h4>
                   <p className="text-[11px] text-nexus-text-muted mt-0.5 leading-relaxed">
-                    Si deseas empezar completamente desde cero, puedes eliminar tu cuenta y todos tus datos (tareas, hábitos, notas diarias, finanzas y preferencias).
+                    Se eliminarán de forma permanente la cuenta y todos los datos asociados.
                   </p>
                 </div>
               </div>
@@ -341,15 +378,12 @@ export const ProfileModal: React.FC = () => {
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-semibold transition cursor-pointer"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
-                  <span>Eliminar Cuenta & Empezar de Cero</span>
+                  <span>Eliminar cuenta</span>
                 </button>
               ) : (
                 <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 space-y-2">
                   <p className="text-xs font-semibold text-rose-300">
-                    ⚠️ ¿Confirmas que deseas eliminar tu cuenta permanentemente?
-                  </p>
-                  <p className="text-[11px] text-nexus-text-muted">
-                    Esta acción es irreversible y borrará todos tus registros para que puedas comenzar de nuevo con un lienzo limpio.
+                    ¿Confirmas que deseas eliminar tu cuenta permanentemente? Esta acción es irreversible.
                   </p>
                   <div className="flex items-center gap-2 pt-1">
                     <button
@@ -359,7 +393,7 @@ export const ProfileModal: React.FC = () => {
                       className="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition shadow-sm flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
-                      <span>{isDeleting ? 'Eliminando...' : 'Sí, eliminar todo y reiniciar'}</span>
+                      <span>{isDeleting ? 'Eliminando...' : 'Confirmar eliminación'}</span>
                     </button>
                     <button
                       type="button"

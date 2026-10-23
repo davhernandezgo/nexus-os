@@ -328,8 +328,10 @@ const Sidebar: React.FC = () => {
             >
               {displayAvatar && (displayAvatar.startsWith('http') || displayAvatar.startsWith('data:')) ? (
                 <img src={displayAvatar} alt="Avatar" className="w-6 h-6 rounded-lg object-cover" />
-              ) : (
+              ) : displayAvatar && displayAvatar !== '👤' ? (
                 <span>{displayAvatar}</span>
+              ) : (
+                <span className="font-bold">{displayName.trim().charAt(0).toUpperCase() || 'U'}</span>
               )}
             </div>
 

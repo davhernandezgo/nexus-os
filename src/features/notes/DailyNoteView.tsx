@@ -201,121 +201,121 @@ const markdownToBlocks = (md: string): PageBlock[] => {
 
 // ─── Clean Skeletons & Frameworks (Pure structure, zero dummy text) ──
 const getLifeOSSkeleton = (): PageBlock[] => [
-  { id: uuidv4(), type: 'heading2', content: '🌅 1. ENFOQUE MATUTINO & INTENCIÓN' },
+  { id: uuidv4(), type: 'heading2', content: '1. Enfoque e intención' },
   {
     id: uuidv4(),
     type: 'callout',
-    content: '🎯 Intención del día: ',
+    content: 'Intención del día: ',
     calloutType: 'info',
   },
-  { id: uuidv4(), type: 'heading2', content: '🎯 2. TOP 3 PRIORIDADES (Must-Do)' },
-  { id: uuidv4(), type: 'todo', content: '🚀 Prioridad 1: ', checked: false },
-  { id: uuidv4(), type: 'todo', content: '⚡ Prioridad 2: ', checked: false },
-  { id: uuidv4(), type: 'todo', content: '🌿 Prioridad 3: ', checked: false },
-  { id: uuidv4(), type: 'heading2', content: '⚡ 3. BLOQUES DE TIEMPO & AGENDA' },
-  { id: uuidv4(), type: 'todo', content: '🌅 Mañana (08:00 - 12:00) | Enfoque principal: ', checked: false },
-  { id: uuidv4(), type: 'todo', content: '☀️ Mediodía (12:00 - 14:00) | Almuerzo & Pausa: ', checked: false },
-  { id: uuidv4(), type: 'todo', content: '🌇 Tarde (14:00 - 18:00) | Tareas & Seguimiento: ', checked: false },
-  { id: uuidv4(), type: 'todo', content: '🌙 Noche (18:00 - 22:00) | Desconexión & Descanso: ', checked: false },
-  { id: uuidv4(), type: 'heading2', content: '💡 4. BITÁCORA & NOTAS' },
+  { id: uuidv4(), type: 'heading2', content: '2. Prioridades' },
+  { id: uuidv4(), type: 'todo', content: 'Prioridad 1: ', checked: false },
+  { id: uuidv4(), type: 'todo', content: 'Prioridad 2: ', checked: false },
+  { id: uuidv4(), type: 'todo', content: 'Prioridad 3: ', checked: false },
+  { id: uuidv4(), type: 'heading2', content: '3. Agenda y bloques' },
+  { id: uuidv4(), type: 'todo', content: 'Mañana (08:00 - 12:00) | ', checked: false },
+  { id: uuidv4(), type: 'todo', content: 'Mediodía (12:00 - 14:00) | ', checked: false },
+  { id: uuidv4(), type: 'todo', content: 'Tarde (14:00 - 18:00) | ', checked: false },
+  { id: uuidv4(), type: 'todo', content: 'Noche (18:00 - 22:00) | ', checked: false },
+  { id: uuidv4(), type: 'heading2', content: '4. Notas' },
   { id: uuidv4(), type: 'paragraph', content: '' },
-  { id: uuidv4(), type: 'heading2', content: '🏆 5. VICTORIAS DEL DÍA & GRATITUD' },
+  { id: uuidv4(), type: 'heading2', content: '5. Cierre del día' },
   {
     id: uuidv4(),
     type: 'callout',
-    content: '🌟 3 Victorias o Agradecimientos de hoy:\n1) \n2) \n3) ',
+    content: 'Puntos clave o conclusiones de hoy:\n1) \n2) \n3) ',
     calloutType: 'info',
   },
 ];
 
 const getMinimalistSkeleton = (): PageBlock[] => [
-  { id: uuidv4(), type: 'heading2', content: '🎯 ENFOQUE ESENCIAL' },
+  { id: uuidv4(), type: 'heading2', content: 'Enfoque esencial' },
   {
     id: uuidv4(),
     type: 'callout',
-    content: '🎯 El único resultado que definirá el éxito de hoy: ',
+    content: 'Objetivo principal: ',
     calloutType: 'info',
   },
-  { id: uuidv4(), type: 'heading3', content: '⚡ Acciones Innegociables' },
-  { id: uuidv4(), type: 'todo', content: '[1] ', checked: false },
-  { id: uuidv4(), type: 'todo', content: '[2] ', checked: false },
-  { id: uuidv4(), type: 'todo', content: '[3] ', checked: false },
-  { id: uuidv4(), type: 'heading3', content: '📝 Notas Rápidas' },
+  { id: uuidv4(), type: 'heading3', content: 'Acciones clave' },
+  { id: uuidv4(), type: 'todo', content: '1. ', checked: false },
+  { id: uuidv4(), type: 'todo', content: '2. ', checked: false },
+  { id: uuidv4(), type: 'todo', content: '3. ', checked: false },
+  { id: uuidv4(), type: 'heading3', content: 'Notas' },
   { id: uuidv4(), type: 'paragraph', content: '' },
 ];
 
 const getDeepWorkSprintSkeleton = (): PageBlock[] => [
-  { id: uuidv4(), type: 'heading2', content: '💻 SPRINT & ENFOQUE PROFUNDO (DEEP WORK)' },
+  { id: uuidv4(), type: 'heading2', content: 'Deep Work & Sprint' },
   {
     id: uuidv4(),
     type: 'callout',
-    content: '🔥 Meta central del sprint de hoy: ',
+    content: 'Meta del sprint: ',
     calloutType: 'info',
   },
-  { id: uuidv4(), type: 'heading3', content: '🎯 Entregables Clave' },
-  { id: uuidv4(), type: 'todo', content: '🛠️ Tarea 1: ', checked: false },
-  { id: uuidv4(), type: 'todo', content: '🛠️ Tarea 2: ', checked: false },
-  { id: uuidv4(), type: 'todo', content: '🧪 Verificación & Pruebas: ', checked: false },
-  { id: uuidv4(), type: 'heading3', content: '📝 Bitácora Técnica / Comandos' },
-  { id: uuidv4(), type: 'code', content: '# Notas de comandos o configuración\n', language: 'bash' },
-  { id: uuidv4(), type: 'heading3', content: '🏁 Cierre & Retrospectiva' },
+  { id: uuidv4(), type: 'heading3', content: 'Entregables' },
+  { id: uuidv4(), type: 'todo', content: 'Entregable 1: ', checked: false },
+  { id: uuidv4(), type: 'todo', content: 'Entregable 2: ', checked: false },
+  { id: uuidv4(), type: 'todo', content: 'Verificación: ', checked: false },
+  { id: uuidv4(), type: 'heading3', content: 'Bitácora técnica' },
+  { id: uuidv4(), type: 'code', content: '# Comandos o notas técnicas\n', language: 'bash' },
+  { id: uuidv4(), type: 'heading3', content: 'Cierre' },
   { id: uuidv4(), type: 'paragraph', content: '' },
 ];
 
 const getWellnessHabitsSkeleton = (): PageBlock[] => [
-  { id: uuidv4(), type: 'heading2', content: '🌿 BIENESTAR & ENERGÍA' },
+  { id: uuidv4(), type: 'heading2', content: 'Bienestar y hábitos' },
   {
     id: uuidv4(),
     type: 'callout',
-    content: '💖 Intención de autocuidado: ',
+    content: 'Objetivo de bienestar: ',
     calloutType: 'info',
   },
-  { id: uuidv4(), type: 'heading3', content: '🧘 Hábitos Innegociables' },
-  { id: uuidv4(), type: 'todo', content: '💧 Hidratación consciente', checked: false },
-  { id: uuidv4(), type: 'todo', content: '🥗 Nutrición balanceada', checked: false },
-  { id: uuidv4(), type: 'todo', content: '🏃 Movimiento o ejercicio', checked: false },
-  { id: uuidv4(), type: 'todo', content: '📚 Lectura o desconexión de pantallas', checked: false },
-  { id: uuidv4(), type: 'heading3', content: '✨ Reflexión & Estado de Ánimo' },
+  { id: uuidv4(), type: 'heading3', content: 'Hábitos del día' },
+  { id: uuidv4(), type: 'todo', content: 'Hidratación', checked: false },
+  { id: uuidv4(), type: 'todo', content: 'Nutrición', checked: false },
+  { id: uuidv4(), type: 'todo', content: 'Actividad física', checked: false },
+  { id: uuidv4(), type: 'todo', content: 'Lectura o descanso', checked: false },
+  { id: uuidv4(), type: 'heading3', content: 'Reflexión' },
   { id: uuidv4(), type: 'paragraph', content: '' },
 ];
 
 const getSharedCoupleSkeleton = (): PageBlock[] => [
-  { id: uuidv4(), type: 'heading2', content: '💑 PLANIFICACIÓN COMPARTIDA & HOGAR' },
+  { id: uuidv4(), type: 'heading2', content: 'Planificación compartida' },
   {
     id: uuidv4(),
     type: 'callout',
-    content: '🤝 Meta o acuerdo conjunto del día: ',
+    content: 'Objetivo conjunto: ',
     calloutType: 'info',
   },
-  { id: uuidv4(), type: 'heading3', content: '🛒 Pendientes del Hogar & Logística' },
-  { id: uuidv4(), type: 'todo', content: 'Gestionar o comprar: ', checked: false },
-  { id: uuidv4(), type: 'todo', content: 'Coordinar horario de: ', checked: false },
-  { id: uuidv4(), type: 'heading3', content: '✨ Tiempo Compartido' },
-  { id: uuidv4(), type: 'todo', content: 'Plan de tiempo de calidad: ', checked: false },
-  { id: uuidv4(), type: 'heading3', content: '💬 Notas & Acuerdos' },
+  { id: uuidv4(), type: 'heading3', content: 'Pendientes y logística' },
+  { id: uuidv4(), type: 'todo', content: 'Gestionar: ', checked: false },
+  { id: uuidv4(), type: 'todo', content: 'Coordinar: ', checked: false },
+  { id: uuidv4(), type: 'heading3', content: 'Tiempo compartido' },
+  { id: uuidv4(), type: 'todo', content: 'Actividad: ', checked: false },
+  { id: uuidv4(), type: 'heading3', content: 'Notas y acuerdos' },
   { id: uuidv4(), type: 'paragraph', content: '' },
 ];
 
 const getWeeklyReviewSkeleton = (): PageBlock[] => [
-  { id: uuidv4(), type: 'heading2', content: '📈 REVISIÓN SEMANAL & RETROSPECTIVA' },
+  { id: uuidv4(), type: 'heading2', content: 'Revisión semanal' },
   {
     id: uuidv4(),
     type: 'callout',
-    content: '📊 Calificación de la semana (1-10) y sentimiento general: ',
+    content: 'Evaluación y balance general: ',
     calloutType: 'info',
   },
-  { id: uuidv4(), type: 'heading3', content: '🏆 Mayores Victorias de la Semana' },
-  { id: uuidv4(), type: 'bullet_list', content: 'Victoria 1: ' },
-  { id: uuidv4(), type: 'bullet_list', content: 'Victoria 2: ' },
-  { id: uuidv4(), type: 'heading3', content: '🔍 Aprendizajes & Obstáculos' },
-  { id: uuidv4(), type: 'bullet_list', content: 'Qué no funcionó bien y cómo mejorarlo: ' },
-  { id: uuidv4(), type: 'heading3', content: '🚀 Enfoque para la Próxima Semana' },
-  { id: uuidv4(), type: 'todo', content: 'Meta clave 1: ', checked: false },
-  { id: uuidv4(), type: 'todo', content: 'Meta clave 2: ', checked: false },
+  { id: uuidv4(), type: 'heading3', content: 'Principales logros' },
+  { id: uuidv4(), type: 'bullet_list', content: 'Logro 1: ' },
+  { id: uuidv4(), type: 'bullet_list', content: 'Logro 2: ' },
+  { id: uuidv4(), type: 'heading3', content: 'Puntos de mejora' },
+  { id: uuidv4(), type: 'bullet_list', content: 'Aspecto a mejorar: ' },
+  { id: uuidv4(), type: 'heading3', content: 'Enfoque para la próxima semana' },
+  { id: uuidv4(), type: 'todo', content: 'Objetivo 1: ', checked: false },
+  { id: uuidv4(), type: 'todo', content: 'Objetivo 2: ', checked: false },
 ];
 
 const getCleanBlankSkeleton = (): PageBlock[] => [
-  { id: uuidv4(), type: 'heading2', content: '📝 Notas del Día' },
+  { id: uuidv4(), type: 'heading2', content: 'Notas del día' },
   { id: uuidv4(), type: 'paragraph', content: '' },
 ];
 
@@ -445,11 +445,7 @@ export default function DailyNoteView() {
 
   const handleDeleteDailyNote = () => {
     if (!note) return;
-    if (
-      window.confirm(
-        `¿Deseas eliminar la nota diaria del ${formattedDateHeader}? Se borrará del sistema y no quedará guardada en tus notas ni en el grafo de conocimiento.`
-      )
-    ) {
+    if (window.confirm(`¿Eliminar la nota del ${formattedDateHeader}?`)) {
       deleteDailyNote(note.id);
       setMarkdownText('');
     }
@@ -823,10 +819,10 @@ export default function DailyNoteView() {
               type="button"
               onClick={handleDeleteDailyNote}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-semibold transition cursor-pointer"
-              title="Eliminar la nota de este día para que no quede guardada"
+              title="Eliminar nota"
             >
               <Trash2 className="w-3.5 h-3.5" />
-              <span>Eliminar Nota</span>
+              <span>Eliminar nota</span>
             </button>
           )}
 
@@ -875,10 +871,9 @@ export default function DailyNoteView() {
             📝
           </div>
           <div className="max-w-md mx-auto space-y-2">
-            <h3 className="text-xl font-bold text-nexus-text">Sin nota registrada para este día</h3>
+            <h3 className="text-xl font-bold text-nexus-text">Sin nota para esta fecha</h3>
             <p className="text-xs text-nexus-text-muted leading-relaxed">
-              No has creado una nota para el <span className="text-nexus-text font-medium">{formattedDateHeader}</span>.
-              Si hoy no tienes nada que registrar, puedes dejarlo libre para que no queden notas vacías en tu historial ni en el grafo.
+              {formattedDateHeader}
             </p>
           </div>
 
@@ -888,8 +883,8 @@ export default function DailyNoteView() {
               onClick={() => handleCreateDailyNote('lifeos')}
               className="w-full sm:w-auto px-5 py-2.5 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:opacity-95 text-white text-xs font-bold transition shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2 cursor-pointer"
             >
-              <Sparkles className="w-4 h-4" />
-              <span>Comenzar con Master LifeOS</span>
+              <Plus className="w-4 h-4" />
+              <span>Crear nota diaria</span>
             </button>
 
             <button
@@ -898,13 +893,13 @@ export default function DailyNoteView() {
               className="w-full sm:w-auto px-4 py-2.5 rounded-2xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-nexus-text text-xs font-semibold transition flex items-center justify-center gap-2 cursor-pointer"
             >
               <FileText className="w-4 h-4 text-slate-400" />
-              <span>Hoja en Blanco</span>
+              <span>Nota en blanco</span>
             </button>
           </div>
 
           <div className="pt-4 border-t border-nexus-border/60">
             <p className="text-[11px] font-semibold text-nexus-text-muted uppercase tracking-wider mb-3">
-              O crea la nota con otra plantilla:
+              Plantillas:
             </p>
             <div className="flex flex-wrap items-center justify-center gap-2">
               <button
@@ -913,7 +908,7 @@ export default function DailyNoteView() {
                 className="px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs text-nexus-text flex items-center gap-1.5 transition cursor-pointer"
               >
                 <Target className="w-3.5 h-3.5 text-cyan-400" />
-                <span>🎯 Enfoque Esencial</span>
+                <span>Esencial</span>
               </button>
               <button
                 type="button"
@@ -921,7 +916,7 @@ export default function DailyNoteView() {
                 className="px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs text-nexus-text flex items-center gap-1.5 transition cursor-pointer"
               >
                 <Code className="w-3.5 h-3.5 text-amber-400" />
-                <span>💻 Deep Work & Sprint</span>
+                <span>Deep Work</span>
               </button>
               <button
                 type="button"
@@ -929,7 +924,7 @@ export default function DailyNoteView() {
                 className="px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs text-nexus-text flex items-center gap-1.5 transition cursor-pointer"
               >
                 <Heart className="w-3.5 h-3.5 text-emerald-400" />
-                <span>🌿 Bienestar & Hábitos</span>
+                <span>Bienestar</span>
               </button>
               <button
                 type="button"
@@ -937,7 +932,7 @@ export default function DailyNoteView() {
                 className="px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs text-nexus-text flex items-center gap-1.5 transition cursor-pointer"
               >
                 <Share2 className="w-3.5 h-3.5 text-pink-400" />
-                <span>💑 Pareja & Hogar</span>
+                <span>Compartida</span>
               </button>
               <button
                 type="button"
@@ -945,7 +940,7 @@ export default function DailyNoteView() {
                 className="px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs text-nexus-text flex items-center gap-1.5 transition cursor-pointer"
               >
                 <FolderKanban className="w-3.5 h-3.5 text-purple-400" />
-                <span>📈 Retrospectiva Semanal</span>
+                <span>Semanal</span>
               </button>
             </div>
           </div>
@@ -958,7 +953,7 @@ export default function DailyNoteView() {
           <div className="flex items-center gap-2">
             <Wand2 className="w-4 h-4 text-indigo-400" />
             <span className="text-xs font-bold uppercase tracking-wider text-nexus-text">
-              Plantillas Rápidas
+              Plantillas
             </span>
           </div>
 
@@ -980,7 +975,7 @@ export default function DailyNoteView() {
               }`}
             >
               <Layers className="w-3.5 h-3.5 text-indigo-400" />
-              <span>Bloques Notion</span>
+              <span>Bloques</span>
             </button>
 
             <button
@@ -996,7 +991,7 @@ export default function DailyNoteView() {
               }`}
             >
               <FileText className="w-3.5 h-3.5 text-pink-400" />
-              <span>Hoja Infinita (Markdown)</span>
+              <span>Markdown</span>
             </button>
           </div>
         </div>
@@ -1007,70 +1002,70 @@ export default function DailyNoteView() {
             type="button"
             onClick={() => handleApplyTemplate('lifeos')}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs font-medium text-nexus-text transition cursor-pointer"
-            title="Estructura integral para tu día: Enfoque, prioridades, agenda y victorias"
+            title="Estructura general con enfoque, prioridades, agenda y notas"
           >
             <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-            <span>🌟 Master LifeOS</span>
+            <span>General</span>
           </button>
 
           <button
             type="button"
             onClick={() => handleApplyTemplate('minimal')}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs font-medium text-nexus-text transition cursor-pointer"
-            title="Un único resultado clave y 3 acciones innegociables"
+            title="Objetivo principal y acciones clave"
           >
             <Target className="w-3.5 h-3.5 text-cyan-400" />
-            <span>🎯 Enfoque Esencial</span>
+            <span>Esencial</span>
           </button>
 
           <button
             type="button"
             onClick={() => handleApplyTemplate('deepwork')}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs font-medium text-nexus-text transition cursor-pointer"
-            title="Sprint técnico de alta concentración, entregables y comandos"
+            title="Sprint de trabajo enfocado y bitácora técnica"
           >
             <Code className="w-3.5 h-3.5 text-amber-400" />
-            <span>💻 Deep Work & Sprint</span>
+            <span>Deep Work</span>
           </button>
 
           <button
             type="button"
             onClick={() => handleApplyTemplate('wellness')}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs font-medium text-nexus-text transition cursor-pointer"
-            title="Hábitos innegociables, autocuidado y salud física/mental"
+            title="Hábitos, autocuidado y salud"
           >
             <Heart className="w-3.5 h-3.5 text-emerald-400" />
-            <span>🌿 Bienestar & Hábitos</span>
+            <span>Bienestar</span>
           </button>
 
           <button
             type="button"
             onClick={() => handleApplyTemplate('couple')}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs font-medium text-nexus-text transition cursor-pointer"
-            title="Acuerdos conjuntos, tareas del hogar y tiempo de calidad"
+            title="Acuerdos, logística y actividades compartidas"
           >
             <Share2 className="w-3.5 h-3.5 text-pink-400" />
-            <span>💑 Pareja & Hogar</span>
+            <span>Compartida</span>
           </button>
 
           <button
             type="button"
             onClick={() => handleApplyTemplate('weekly')}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs font-medium text-nexus-text transition cursor-pointer"
-            title="Calificación, mayores victorias, aprendizajes y foco para la siguiente semana"
+            title="Balance semanal y próximos objetivos"
           >
             <FolderKanban className="w-3.5 h-3.5 text-purple-400" />
-            <span>📈 Retrospectiva Semanal</span>
+            <span>Semanal</span>
           </button>
 
           <button
             type="button"
             onClick={() => handleApplyTemplate('clean')}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs font-medium text-nexus-text transition cursor-pointer"
-            title="Lienzo limpio sin bloques previos"
+            title="Documento en blanco"
           >
             <FileText className="w-3.5 h-3.5 text-slate-400" />
-            <span>📝 Hoja en Blanco</span>
+            <span>En blanco</span>
           </button>
 
           {/* Plantillas Personalizadas */}
@@ -1193,7 +1188,7 @@ export default function DailyNoteView() {
               className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md shadow-indigo-500/20 transition cursor-pointer"
             >
               <FolderKanban className="w-3.5 h-3.5" />
-              <span>+ Vincular Tarea de Proyecto</span>
+              <span>Vincular Tarea</span>
             </button>
 
             {/* Task Picker Dropdown */}
@@ -1390,7 +1385,7 @@ export default function DailyNoteView() {
               onClick={() => setIsTaskPickerOpen(true)}
               className="px-3 py-1.5 rounded-xl bg-nexus-surface-3 hover:bg-nexus-surface-2 border border-nexus-border text-xs font-medium text-indigo-400 transition shrink-0 cursor-pointer"
             >
-              + Vincular primera tarea
+              Vincular primera tarea
             </button>
           </div>
         )}
@@ -1416,7 +1411,7 @@ export default function DailyNoteView() {
           }}
         />
       ) : (
-        /* ─── Mode 2: Notion Structured Blocks ─────────────────── */
+        /* ─── Mode 2: Structured Blocks ─────────────────── */
         <div className="space-y-2 min-h-96 relative">
           {activeContent.map((block, idx) => {
             return (
@@ -1686,7 +1681,7 @@ export default function DailyNoteView() {
             className="flex items-center gap-2 text-xs font-semibold text-nexus-text-muted hover:text-nexus-text py-3 px-3 rounded-xl transition cursor-pointer hover:bg-nexus-surface-2/40 border border-dashed border-nexus-border hover:border-nexus-border-hover w-full justify-center"
           >
             <Plus className="w-4 h-4 text-indigo-400" />
-            <span>+ Agregar nuevo bloque</span>
+            <span>Agregar nuevo bloque</span>
           </button>
         </div>
       )}

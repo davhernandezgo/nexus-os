@@ -301,13 +301,10 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
               <Sparkles className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-nexus-text flex items-center gap-2">
-                <span>Nueva Tarea</span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-nexus-surface-3 text-indigo-400 border border-nexus-border">
-                  con Hoja Notion
-                </span>
+              <h2 className="text-base font-bold text-nexus-text">
+                Nueva Tarea
               </h2>
-              <p className="text-xs text-nexus-text-muted">Crea una tarea; su hoja de notas y documento se asociará automáticamente</p>
+              <p className="text-xs text-nexus-text-muted">Crea una tarea con sus notas y propiedades asociadas</p>
             </div>
           </div>
           <button
@@ -625,13 +622,13 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-nexus-text-secondary uppercase tracking-wider flex items-center gap-1.5">
               <FileText className="w-3.5 h-3.5 text-indigo-400" />
-              <span>Documento / Hoja de Notas de la Tarea</span>
+              <span>Documento / Notas de la Tarea</span>
             </label>
             <textarea
               rows={3}
               value={description}
               onChange={e => setDescription(e.target.value)}
-              placeholder="Escribe notas preliminares, objetivos o enlaces (esta hoja se asocia a la tarea y la puedes editar en Notion)..."
+              placeholder="Escribe notas preliminares, objetivos o enlaces..."
               className="w-full px-3.5 py-2.5 rounded-2xl bg-nexus-surface-2 border border-nexus-border text-xs text-nexus-text placeholder-nexus-text-muted focus:outline-none focus:border-indigo-500 resize-none leading-relaxed"
             />
           </div>

@@ -351,7 +351,7 @@ export default function ExpenseTracker() {
           className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-nexus-accent-indigo to-indigo-600 hover:opacity-95 text-white font-semibold text-xs transition shadow-lg shadow-indigo-500/20 active:scale-95"
         >
           <Plus className="w-4 h-4" />
-          <span>+ Registrar Gasto Detallado</span>
+          <span>Registrar Gasto Detallado</span>
         </button>
       </div>
 
@@ -536,7 +536,7 @@ export default function ExpenseTracker() {
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-nexus-text text-xs font-semibold transition"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>+ Definir Meta Mensual</span>
+            <span>Definir Meta Mensual</span>
           </button>
         </div>
 

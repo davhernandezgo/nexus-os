@@ -256,7 +256,7 @@ export const ProjectView: React.FC = () => {
               className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-nexus-accent-indigo to-indigo-600 hover:opacity-95 text-white text-xs font-semibold shadow-lg shadow-indigo-500/20 transition active:scale-95"
             >
               <Plus className="w-4 h-4" />
-              <span>+ Nueva Tarea</span>
+              <span>Nueva Tarea</span>
             </button>
           </div>
         </div>
@@ -380,7 +380,7 @@ export const ProjectView: React.FC = () => {
               <p className="text-xs text-nexus-text-muted">
                 {filter === 'done'
                   ? 'Aún no has completado ninguna tarea en este proyecto.'
-                  : 'Crea tu primera tarea; cada tarea incluye su propia hoja y documento Notion asociado.'}
+                  : 'Crea tu primera tarea para organizar este proyecto.'}
               </p>
             </div>
             <button
@@ -423,7 +423,7 @@ export const ProjectView: React.FC = () => {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       {isPage && (
-                        <span className="p-1 rounded bg-nexus-surface-3 text-nexus-text-muted text-[10px] shrink-0" title="Tiene documento / hoja Notion asociada">
+                        <span className="p-1 rounded bg-nexus-surface-3 text-nexus-text-muted text-[10px] shrink-0" title="Tiene documento asociado">
                           <FileText className="w-3 h-3 text-indigo-400" />
                         </span>
                       )}

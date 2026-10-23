@@ -112,14 +112,14 @@ const InboxView: React.FC = () => {
             </button>
           </div>
 
-          {/* + Nueva Tarea Pop-up Button */}
+          {/* Nueva Tarea Button */}
           <button
             onClick={() => setShowCreateModal(true)}
             className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-pink-600 hover:opacity-95 text-white text-xs font-bold shrink-0 shadow-md shadow-indigo-500/25 active:scale-95 transition cursor-pointer"
-            title="Crear nueva tarea con hoja Notion integrada (Pop-up)"
+            title="Crear nueva tarea"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
-            <span>+ Nueva Tarea</span>
+            <span>Nueva Tarea</span>
           </button>
         </div>
       </div>
@@ -265,7 +265,7 @@ const InboxView: React.FC = () => {
                   {/* Open Document / Sheet Indicator on Hover */}
                   <div
                     className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 text-[11px] font-semibold text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 px-2 py-1 rounded-lg border border-indigo-500/20"
-                    title="Abrir hoja de notas y documento Notion asociado"
+                    title="Abrir documento y notas asociadas"
                   >
                     <FileText className="w-3 h-3" />
                     <span className="hidden md:inline">Documento</span>

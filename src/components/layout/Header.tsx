@@ -6,7 +6,6 @@ import {
   Play,
   Pause,
   Square,
-  LogOut,
   Moon,
   Sun,
 } from 'lucide-react';
@@ -45,7 +44,6 @@ const Header: React.FC = () => {
     markNotificationRead,
     clearNotifications,
     getUnreadCount,
-    logout,
     currentOwner,
     currentUser,
     accounts,
@@ -60,7 +58,8 @@ const Header: React.FC = () => {
   const currentAccount = accounts.find(a => a.owner === currentOwner || a.id === currentUser?.id);
   const accentColor = currentAccount?.accentColor || '#6366f1';
   const displayName = currentUser?.displayName || currentAccount?.displayName || 'Usuario';
-  const displayAvatar = currentAccount?.avatar || currentUser?.avatar || '👤';
+  const displayAvatar = currentAccount?.avatar || currentUser?.avatar || '';
+  const initialLetter = displayName.trim().charAt(0).toUpperCase() || 'U';
   const unreadCount = getUnreadCount();
 
   // Determine current view title
@@ -268,31 +267,26 @@ const Header: React.FC = () => {
         </div>
 
         {/* User Profile Chip (Clickable to open ProfileModal) */}
-        <div className="flex items-center gap-2 pl-2 border-l border-nexus-border">
+        <div className="flex items-center pl-2 border-l border-nexus-border">
           <button
             onClick={() => setProfileOpen(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border text-xs font-semibold text-nexus-text transition-all group cursor-pointer shadow-xs"
+            className="flex items-center gap-2 p-1 sm:px-2.5 sm:py-1 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border text-xs font-semibold text-nexus-text transition-all group cursor-pointer shadow-xs"
             style={{ borderColor: accentColor }}
-            title="Editar mi perfil y apariencia"
+            title="Mi perfil y configuración"
           >
-            <span className="text-sm flex items-center justify-center">
+            <span
+              className="w-7 h-7 sm:w-6 sm:h-6 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 overflow-hidden"
+              style={{ backgroundColor: `${accentColor}20`, color: accentColor }}
+            >
               {displayAvatar && (displayAvatar.startsWith('http') || displayAvatar.startsWith('data:')) ? (
-                <img src={displayAvatar} alt="Avatar" className="w-5 h-5 rounded-full object-cover" />
+                <img src={displayAvatar} alt="Avatar" className="w-full h-full object-cover" />
+              ) : displayAvatar && displayAvatar !== '👤' ? (
+                <span className="text-sm leading-none">{displayAvatar}</span>
               ) : (
-                <span>{displayAvatar}</span>
+                <span className="font-bold">{initialLetter}</span>
               )}
             </span>
-            <span className="hidden sm:inline capitalize max-w-[140px] truncate">{displayName}</span>
-            <span className="text-[10px] text-nexus-text-muted group-hover:text-indigo-400 transition ml-0.5">⚙️</span>
-          </button>
-
-          {/* Logout button */}
-          <button
-            onClick={logout}
-            className="p-1.5 rounded-xl text-nexus-text-muted hover:text-red-400 hover:bg-nexus-surface-2 transition-colors cursor-pointer"
-            title="Cerrar sesión"
-          >
-            <LogOut className="w-4 h-4" />
+            <span className="hidden sm:inline capitalize max-w-[120px] truncate">{displayName}</span>
           </button>
         </div>
       </div>

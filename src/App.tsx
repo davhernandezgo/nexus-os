@@ -134,7 +134,7 @@ const App: React.FC = () => {
       {/* User Profile & Appearance Modal */}
       <ProfileModal />
 
-      {/* Notion-Style Task Page Modal */}
+      {/* Task Page Modal */}
       <AnimatePresence>
         {selectedTaskId && (
           <TaskDetailModal

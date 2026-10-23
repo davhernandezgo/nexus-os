@@ -71,7 +71,7 @@ export interface Task {
   // Reminders
   reminderDate?: string;
 
-  // Page content (Notion-style)
+  // Page content
   pageContent: PageBlock[];
 
   // WikiLinks referenced
@@ -99,7 +99,7 @@ export function getEfficiencyRatio(task: Task): number | null {
   return task.estimatedMinutes / task.actualMinutes; // >1 = faster than estimated
 }
 
-// ─── Page Blocks (Notion-style editor) ──────────────────────────
+// ─── Page Blocks ─────────────────────────────────────────────
 export type BlockType =
   | 'paragraph'
   | 'heading1'
@@ -125,7 +125,7 @@ export interface PageBlock {
   children?: PageBlock[];
 }
 
-// ─── Templates (Notion-style page templates) ────────────────────
+// ─── Templates (Page templates) ─────────────────────────────────
 export type TemplateCategory = 'all' | 'work' | 'couple' | 'personal' | 'health' | 'finance' | 'custom';
 
 export interface TaskTemplate {

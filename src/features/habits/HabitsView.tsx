@@ -203,7 +203,7 @@ export default function HabitsView() {
               onClick={() => setCreateModalOpen(true)}
               className="px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-md transition-all"
             >
-              + Crear primer hábito
+              Crear primer hábito
             </button>
           </div>
         ) : (

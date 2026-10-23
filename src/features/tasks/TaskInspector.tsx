@@ -627,7 +627,7 @@ export default function TaskInspector() {
             </div>
           </div>
 
-          {/* Properties Header (Table Style like Notion) */}
+          {/* Properties Header */}
           <div className="bg-nexus-surface-2/60 rounded-xl border border-nexus-border p-4 space-y-3">
             <h3 className="text-xs font-bold uppercase tracking-wider text-nexus-text-muted">
               Propiedades
@@ -997,14 +997,14 @@ export default function TaskInspector() {
             </div>
           </div>
 
-          {/* Notion-Style Page Content & Infinite Markdown Canvas */}
+          {/* Page Content & Markdown Canvas */}
           <div className="space-y-3 pt-2 border-t border-nexus-border">
             {/* Header with Mode Switcher & Stats */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-1">
               <div className="flex items-center gap-2">
                 <FileText className="w-4 h-4 text-nexus-accent-indigo" />
                 <h3 className="text-xs font-bold uppercase tracking-wider text-nexus-text">
-                  Hoja de Documento & Notas
+                  Documento & Notas
                 </h3>
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-nexus-surface-2 border border-nexus-border text-emerald-400 font-mono">
                   ✔ Guardado en tiempo real
@@ -1026,7 +1026,7 @@ export default function TaskInspector() {
                   }`}
                 >
                   <FileText className="w-3.5 h-3.5 text-indigo-400" />
-                  <span>Hoja Infinita (Markdown)</span>
+                  <span>Markdown</span>
                 </button>
                 <button
                   type="button"
@@ -1042,7 +1042,7 @@ export default function TaskInspector() {
                   }`}
                 >
                   <Layers className="w-3.5 h-3.5 text-pink-400" />
-                  <span>Bloques Notion</span>
+                  <span>Bloques</span>
                 </button>
               </div>
             </div>
@@ -1170,14 +1170,14 @@ export default function TaskInspector() {
                     rows={16}
                     value={markdownText}
                     onChange={e => handleMarkdownChange(e.target.value)}
-                    placeholder="Escribe libremente como en Word o Notion: títulos con #, listas con -, checklists con - [ ], código, etc..."
+                    placeholder="Escribe libremente: títulos con #, listas con -, checklists con - [ ], código, etc..."
                     className="w-full bg-transparent text-nexus-text text-sm leading-relaxed outline-none resize-y font-sans placeholder-nexus-text-muted min-h-[320px]"
                   />
                   <div className="flex items-center justify-between pt-2 border-t border-nexus-border/40 text-[11px] text-nexus-text-muted">
                     <span>
                       {markdownText.split(/\s+/).filter(Boolean).length} palabras • {markdownText.length} caracteres
                     </span>
-                    <span className="font-mono text-nexus-text-muted">Markdown + Controles Word</span>
+                    <span className="font-mono text-nexus-text-muted">Markdown</span>
                   </div>
                 </div>
               </div>
@@ -1199,7 +1199,7 @@ export default function TaskInspector() {
                       onClick={() => handleAddBlock('paragraph')}
                       className="p-6 text-center border border-dashed border-nexus-border rounded-xl text-nexus-text-muted text-xs hover:border-nexus-border-hover hover:bg-nexus-surface-2/30 cursor-pointer"
                     >
-                      Escribe algo o presiona <strong className="text-indigo-400">+ Bloque</strong> para comenzar tu documento Notion-style...
+                      Escribe algo o presiona <strong className="text-indigo-400">+ Bloque</strong> para comenzar tu documento...
                     </div>
                   ) : (
                     task.pageContent.map((block, idx) => {
