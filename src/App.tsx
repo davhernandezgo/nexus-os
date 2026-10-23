@@ -9,6 +9,7 @@ import Header from './components/layout/Header';
 import QuickAdd from './components/ui/QuickAdd';
 import CommandPalette from './features/command-palette/CommandPalette';
 import TaskDetailModal from './features/tasks/TaskDetailModal';
+import ProfileModal from './features/profile/ProfileModal';
 
 // Views
 import InboxView from './features/tasks/InboxView';
@@ -28,9 +29,18 @@ const App: React.FC = () => {
     setCommandPaletteOpen,
     selectedTaskId,
     setSelectedTaskId,
+    theme,
   } = useNexusStore();
 
   const location = useLocation();
+
+  // Sync theme with HTML root
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.documentElement.classList.toggle('light', theme === 'light');
+      document.documentElement.setAttribute('data-theme', theme || 'dark');
+    }
+  }, [theme]);
 
   // Sync with Supabase Auth session
   useEffect(() => {
@@ -120,6 +130,9 @@ const App: React.FC = () => {
 
       {/* Command Palette (Cmd+K) Modal */}
       <CommandPalette />
+
+      {/* User Profile & Appearance Modal */}
+      <ProfileModal />
 
       {/* Notion-Style Task Page Modal */}
       <AnimatePresence>

@@ -277,6 +277,8 @@ export default function DailyNoteView() {
     dailyNotes,
     upsertDailyNote,
     currentOwner,
+    currentUser,
+    accounts,
     tasks,
     projects,
     habits,
@@ -287,6 +289,10 @@ export default function DailyNoteView() {
     customTemplates,
     deleteCustomTemplate,
   } = useNexusStore();
+
+  const currentAccount = accounts.find(a => a.owner === currentOwner || a.id === currentUser?.id);
+  const currentDisplayName = currentUser?.displayName || currentAccount?.displayName || 'Mi Usuario';
+  const currentAvatar = currentAccount?.avatar || currentUser?.avatar || '👤';
 
   const [currentDateStr, setCurrentDateStr] = useState<string>(() => {
     return new Date().toISOString().split('T')[0];
@@ -687,8 +693,9 @@ export default function DailyNoteView() {
             <Bookmark className="w-3.5 h-3.5 text-indigo-400" />
             <span>Diario Personal</span>
             <span className="text-nexus-border">•</span>
-            <span className="text-indigo-400 font-bold">
-              {currentOwner === 'david' ? '👨‍💻 David' : '👩‍🎨 Cami'}
+            <span className="text-indigo-400 font-bold flex items-center gap-1">
+              <span>{currentAvatar}</span>
+              <span>{currentDisplayName}</span>
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-nexus-text tracking-tight flex items-center gap-2.5">
@@ -1491,7 +1498,7 @@ export default function DailyNoteView() {
                     </span>
                   </div>
                   <p className="text-[11px] text-nexus-text-muted mt-1 truncate">
-                    {t.category} • {t.owner === 'david' ? 'David' : 'Cami'}
+                    {t.category} • {accounts.find(a => a.owner === t.owner)?.displayName || t.owner || currentDisplayName}
                   </p>
                 </div>
               ))}

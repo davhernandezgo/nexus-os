@@ -20,7 +20,7 @@ import { formatDistanceToNow, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 export default function SharedBoard() {
-  const { sharedNotes, addSharedNote, updateSharedNote, deleteSharedNote, currentOwner } = useNexusStore();
+  const { sharedNotes, addSharedNote, updateSharedNote, deleteSharedNote, currentOwner, accounts, coupleSpace } = useNexusStore();
 
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -357,11 +357,11 @@ export default function SharedBoard() {
                 {/* Card Footer: Metadata */}
                 <div className="pt-4 mt-3 border-t border-nexus-border/40 flex items-center justify-between text-[11px] text-nexus-text-muted">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xs">{note.updatedBy === 'david' ? '👨‍💻' : '👩‍🎨'}</span>
+                    <span className="text-xs">{accounts.find(a => a.owner === note.updatedBy)?.avatar || (note.updatedBy === 'david' ? '👨‍💻' : note.updatedBy === 'cami' ? '👩‍🎨' : '👤')}</span>
                     <span>
                       Actualizado por{' '}
-                      <span className={note.updatedBy === 'david' ? 'text-indigo-400 font-semibold' : 'text-pink-400 font-semibold'}>
-                        {note.updatedBy === 'david' ? 'David' : 'Cami'}
+                      <span className="text-indigo-400 font-semibold">
+                        {accounts.find(a => a.owner === note.updatedBy)?.displayName || (note.updatedBy === 'david' ? (coupleSpace?.user1Name || 'David') : (coupleSpace?.user2Name || 'Cami'))}
                       </span>
                     </span>
                   </div>

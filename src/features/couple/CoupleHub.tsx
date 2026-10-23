@@ -62,6 +62,7 @@ export default function CoupleHub() {
     joinCoupleSpace,
     updateCoupleSpace,
     unlinkCoupleSpace,
+    accounts,
   } = useNexusStore();
 
   const [activeTab, setActiveTab] = useState<CoupleTab>('expenses');
@@ -578,8 +579,8 @@ export default function CoupleHub() {
 
                       <div className="flex items-center gap-3 flex-shrink-0">
                         <span className="text-xs px-2.5 py-1 rounded-full bg-nexus-surface-2 border border-nexus-border font-medium flex items-center gap-1.5">
-                          <span>{task.owner === 'david' ? '👨‍💻' : '👩‍🎨'}</span>
-                          <span>{task.owner === 'david' ? 'David' : 'Cami'}</span>
+                          <span>{accounts.find(a => a.owner === task.owner)?.avatar || (task.owner === 'david' ? '👨‍💻' : '👩‍🎨')}</span>
+                          <span>{accounts.find(a => a.owner === task.owner)?.displayName || (task.owner === 'david' ? (coupleSpace?.user1Name || 'David') : (coupleSpace?.user2Name || 'Cami'))}</span>
                         </span>
                       </div>
                     </div>

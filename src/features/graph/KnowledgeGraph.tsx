@@ -81,6 +81,7 @@ export default function KnowledgeGraph({ onNodeClick }: KnowledgeGraphProps) {
     updateTask,
     setSelectedTaskId,
     currentOwner,
+    accounts,
     contextMode,
   } = useNexusStore();
 
@@ -1662,7 +1663,7 @@ export default function KnowledgeGraph({ onNodeClick }: KnowledgeGraphProps) {
           {/* Footer Actions */}
           <div className="flex items-center justify-between pt-2 border-t border-nexus-border/60 text-xs">
             <span className="text-nexus-text-muted font-medium">
-              {selectedNode.owner === 'david' ? '👨‍💻 David' : '👩‍🎨 Cami'}
+              {accounts.find(a => a.owner === selectedNode.owner)?.displayName || selectedNode.owner}
             </span>
 
             <button

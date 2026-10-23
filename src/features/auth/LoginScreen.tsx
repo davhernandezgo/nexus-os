@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useNexusStore } from '../../store/nexusStore';
 import { supabase } from '../../lib/supabase';
+import NexusLogo from '../../components/ui/NexusLogo';
 
 type AuthMode = 'login' | 'signup';
 
@@ -135,10 +136,8 @@ const LoginScreen: React.FC = () => {
       {/* Main Container */}
       <div className="relative z-10 w-full max-w-md">
         {/* Logo and Titles */}
-        <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-nexus-surface-2 border border-nexus-border shadow-xl mb-3">
-            <Sparkles className="w-8 h-8 text-indigo-400" />
-          </div>
+        <div className="text-center mb-6 flex flex-col items-center">
+          <NexusLogo size="lg" className="mb-3" />
           <h1 className="text-3xl font-extrabold tracking-tight text-nexus-text">NexusOS</h1>
           <p className="text-xs text-nexus-text-muted mt-1">
             LifeOS • Finanzas Personales & Pareja

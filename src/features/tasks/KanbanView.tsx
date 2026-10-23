@@ -77,6 +77,7 @@ export default function KanbanView() {
     updateTask,
     addTask,
     currentOwner,
+    accounts,
   } = useNexusStore();
 
   const visibleTasks = getVisibleTasks();
@@ -456,7 +457,7 @@ export default function KanbanView() {
                                   className="w-5 h-5 rounded-full bg-nexus-surface-3 text-nexus-text-muted flex items-center justify-center text-[11px]"
                                   title={`Asignada a ${task.owner}`}
                                 >
-                                  {task.owner === 'david' ? '👨‍💻' : '👩‍🎨'}
+                                  {accounts.find(a => a.owner === task.owner)?.avatar || (task.owner === 'david' ? '👨‍💻' : task.owner === 'cami' ? '👩‍🎨' : '👤')}
                                 </span>
                               )}
                             </div>

@@ -1,18 +1,14 @@
 import React, { useState } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Menu,
   Bell,
-  Clock,
   Play,
   Pause,
   Square,
   LogOut,
-  Lock,
-  Heart,
-  Zap,
-  CheckCheck,
-  X,
+  Moon,
+  Sun,
 } from 'lucide-react';
 import { useNexusStore } from '../../store/nexusStore';
 import type { ContextMode } from '../../types/nexus';
@@ -24,18 +20,23 @@ const VIEW_TITLES: Record<string, string> = {
   '/calendar': '📅 Calendario',
   '/habits': '✅ Hábitos',
   '/couple': '💑 Hub Pareja',
+  '/investments': '📈 Inversiones ($ USD)',
   '/graph': '🔗 Grafo',
   '/daily-note': '📝 Nota del Día',
 };
 
 const Header: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
 
   const {
     sidebarOpen,
     setSidebarOpen,
+    sidebarCollapsed,
+    toggleSidebarCollapse,
     contextMode,
     switchContext,
+    coupleSpace,
     timer,
     pauseTimer,
     resumeTimer,
@@ -46,14 +47,20 @@ const Header: React.FC = () => {
     getUnreadCount,
     logout,
     currentOwner,
+    currentUser,
     accounts,
     projects,
+    theme,
+    toggleTheme,
+    setProfileOpen,
   } = useNexusStore();
 
   const [notificationsOpen, setNotificationsOpen] = useState(false);
 
-  const currentAccount = accounts.find(a => a.owner === currentOwner);
+  const currentAccount = accounts.find(a => a.owner === currentOwner || a.id === currentUser?.id);
   const accentColor = currentAccount?.accentColor || '#6366f1';
+  const displayName = currentUser?.displayName || currentAccount?.displayName || 'Usuario';
+  const displayAvatar = currentAccount?.avatar || currentUser?.avatar || '👤';
   const unreadCount = getUnreadCount();
 
   // Determine current view title
@@ -83,18 +90,24 @@ const Header: React.FC = () => {
   ];
 
   return (
-    <header className="h-14 glass-panel border-b border-nexus-border sticky top-0 z-30 flex items-center justify-between px-3 sm:px-6 shrink-0">
-      {/* Left Area: Mobile Hamburger & View Title */}
+    <header className="h-14 glass-panel border-b border-nexus-border sticky top-0 z-30 flex items-center justify-between px-3 sm:px-6 shrink-0 select-none">
+      {/* Left Area: Mobile/Desktop Toggle & View Title */}
       <div className="flex items-center gap-3">
         <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="p-1.5 rounded-lg border border-nexus-border text-nexus-text-secondary hover:text-nexus-text hover:bg-nexus-surface-2 transition-colors md:hidden"
-          title="Menú de navegación"
+          onClick={() => {
+            if (window.innerWidth < 768) {
+              setSidebarOpen(!sidebarOpen);
+            } else {
+              toggleSidebarCollapse();
+            }
+          }}
+          className="p-1.5 rounded-xl border border-nexus-border text-nexus-text-secondary hover:text-nexus-text hover:bg-nexus-surface-2 transition-colors cursor-pointer"
+          title={sidebarCollapsed ? 'Expandir barra lateral' : 'Contraer barra lateral'}
         >
           <Menu className="w-5 h-5" />
         </button>
 
-        <h1 className="text-sm sm:text-base font-bold text-nexus-text tracking-tight truncate max-w-[160px] sm:max-w-[220px]">
+        <h1 className="text-sm sm:text-base font-bold text-nexus-text tracking-tight truncate max-w-[160px] sm:max-w-[240px]">
           {currentTitle}
         </h1>
       </div>
@@ -107,8 +120,17 @@ const Header: React.FC = () => {
           return (
             <button
               key={opt.mode}
-              onClick={() => switchContext(opt.mode)}
-              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-xl text-xs font-semibold transition-all ${
+              onClick={() => {
+                if (opt.mode === 'couple') {
+                  if (coupleSpace?.status !== 'active') {
+                    navigate('/couple');
+                  }
+                  switchContext('couple');
+                } else {
+                  switchContext(opt.mode);
+                }
+              }}
+              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                 isActive
                   ? 'bg-nexus-surface-3 text-nexus-text shadow-sm'
                   : 'text-nexus-text-muted hover:text-nexus-text'
@@ -129,7 +151,7 @@ const Header: React.FC = () => {
         })}
       </div>
 
-      {/* Right Area: Timer Mini-Display, Notifications, Avatar, Logout */}
+      {/* Right Area: Timer Mini-Display, Notifications, Theme, Avatar, Logout */}
       <div className="flex items-center gap-2 sm:gap-3">
         {/* Timer Mini-Display */}
         {timer.state !== 'idle' && (
@@ -144,79 +166,77 @@ const Header: React.FC = () => {
             <span className="font-mono text-xs font-bold text-nexus-text">
               {formatTime(timer.elapsed)}
             </span>
-            {timer.targetTitle && (
-              <span className="text-[11px] text-nexus-text-muted truncate max-w-[90px] hidden md:inline">
-                {timer.targetTitle}
-              </span>
-            )}
-            <div className="flex items-center gap-1 ml-1 border-l border-nexus-border pl-1">
+            <div className="flex items-center gap-1 border-l border-nexus-border pl-1.5 ml-1">
               {timer.state === 'running' ? (
                 <button
                   onClick={pauseTimer}
-                  className="p-1 text-nexus-text-muted hover:text-amber-400 transition-colors"
+                  className="p-1 hover:text-amber-400 transition cursor-pointer"
                   title="Pausar"
                 >
-                  <Pause className="w-3 h-3 fill-current" />
+                  <Pause className="w-3 h-3" />
                 </button>
               ) : (
                 <button
                   onClick={resumeTimer}
-                  className="p-1 text-nexus-text-muted hover:text-emerald-400 transition-colors"
+                  className="p-1 hover:text-emerald-400 transition cursor-pointer"
                   title="Reanudar"
                 >
-                  <Play className="w-3 h-3 fill-current" />
+                  <Play className="w-3 h-3" />
                 </button>
               )}
               <button
                 onClick={() => stopTimer()}
-                className="p-1 text-nexus-text-muted hover:text-red-400 transition-colors"
-                title="Detener y guardar tiempo"
+                className="p-1 hover:text-red-400 transition cursor-pointer"
+                title="Detener"
               >
-                <Square className="w-3 h-3 fill-current" />
+                <Square className="w-3 h-3" />
               </button>
             </div>
           </div>
         )}
 
-        {/* Notification Bell with Badge */}
+        {/* Theme Toggle (Dark / Light) */}
+        <button
+          onClick={toggleTheme}
+          className="p-1.5 sm:p-2 rounded-xl text-nexus-text-muted hover:text-nexus-text hover:bg-nexus-surface-2 border border-transparent hover:border-nexus-border transition-colors cursor-pointer"
+          title={theme === 'dark' ? 'Cambiar a Modo Claro' : 'Cambiar a Modo Oscuro'}
+        >
+          {theme === 'dark' ? (
+            <Sun className="w-4 h-4 text-amber-400" />
+          ) : (
+            <Moon className="w-4 h-4 text-indigo-500" />
+          )}
+        </button>
+
+        {/* Notifications Dropdown */}
         <div className="relative">
           <button
             onClick={() => setNotificationsOpen(!notificationsOpen)}
-            className="p-2 rounded-xl text-nexus-text-secondary hover:text-nexus-text hover:bg-nexus-surface-2 border border-transparent hover:border-nexus-border transition-colors relative"
+            className="p-1.5 sm:p-2 rounded-xl text-nexus-text-muted hover:text-nexus-text hover:bg-nexus-surface-2 border border-transparent hover:border-nexus-border transition-colors relative cursor-pointer"
             title="Notificaciones"
           >
             <Bell className="w-4 h-4" />
             {unreadCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
-                {unreadCount > 9 ? '9+' : unreadCount}
-              </span>
+              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-indigo-500 ring-2 ring-nexus-surface" />
             )}
           </button>
 
-          {/* Notifications Dropdown Popup */}
+          {/* Notifications Flyout */}
           {notificationsOpen && (
-            <div className="absolute right-0 mt-2 w-80 bg-nexus-surface-2 border border-nexus-border rounded-2xl shadow-2xl p-4 z-50 animate-fade-in">
-              <div className="flex items-center justify-between pb-3 border-b border-nexus-border">
-                <span className="text-xs font-bold text-nexus-text">Notificaciones</span>
-                <div className="flex items-center gap-2">
+            <div className="absolute right-0 mt-2 w-80 glass-panel rounded-2xl shadow-2xl p-4 z-50 border border-nexus-border animate-fade-in">
+              <div className="flex items-center justify-between pb-3 border-b border-nexus-border mb-3">
+                <span className="font-bold text-xs text-nexus-text">Notificaciones</span>
+                {notifications.length > 0 && (
                   <button
-                    onClick={() => {
-                      notifications.forEach(n => markNotificationRead(n.id));
-                    }}
-                    className="text-[10px] text-indigo-400 hover:underline flex items-center gap-1"
+                    onClick={clearNotifications}
+                    className="text-[11px] text-nexus-text-muted hover:text-nexus-text transition cursor-pointer"
                   >
-                    <CheckCheck className="w-3 h-3" /> Marcar todas
+                    Limpiar todo
                   </button>
-                  <button
-                    onClick={() => setNotificationsOpen(false)}
-                    className="text-nexus-text-muted hover:text-nexus-text"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                </div>
+                )}
               </div>
 
-              <div className="py-2 space-y-2 max-h-64 overflow-y-auto">
+              <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
                 {notifications.length === 0 ? (
                   <div className="text-center py-6 text-xs text-nexus-text-muted">
                     No tienes notificaciones
@@ -247,26 +267,29 @@ const Header: React.FC = () => {
           )}
         </div>
 
-        {/* User Avatar + Name */}
+        {/* User Profile Chip (Clickable to open ProfileModal) */}
         <div className="flex items-center gap-2 pl-2 border-l border-nexus-border">
-          <div
-            className="flex items-center gap-1.5 px-2 py-1 rounded-xl bg-nexus-surface-2 border text-xs font-semibold text-nexus-text"
+          <button
+            onClick={() => setProfileOpen(true)}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border text-xs font-semibold text-nexus-text transition-all group cursor-pointer shadow-xs"
             style={{ borderColor: accentColor }}
+            title="Editar mi perfil y apariencia"
           >
             <span className="text-sm flex items-center justify-center">
-              {currentAccount?.avatar && (currentAccount.avatar.startsWith('http') || currentAccount.avatar.startsWith('data:')) ? (
-                <img src={currentAccount.avatar} alt="Avatar" className="w-5 h-5 rounded-full object-cover" />
+              {displayAvatar && (displayAvatar.startsWith('http') || displayAvatar.startsWith('data:')) ? (
+                <img src={displayAvatar} alt="Avatar" className="w-5 h-5 rounded-full object-cover" />
               ) : (
-                currentAccount?.avatar || '👤'
+                <span>{displayAvatar}</span>
               )}
             </span>
-            <span className="hidden sm:inline capitalize">{currentAccount?.displayName}</span>
-          </div>
+            <span className="hidden sm:inline capitalize max-w-[140px] truncate">{displayName}</span>
+            <span className="text-[10px] text-nexus-text-muted group-hover:text-indigo-400 transition ml-0.5">⚙️</span>
+          </button>
 
           {/* Logout button */}
           <button
             onClick={logout}
-            className="p-1.5 rounded-xl text-nexus-text-muted hover:text-red-400 hover:bg-nexus-surface-2 transition-colors"
+            className="p-1.5 rounded-xl text-nexus-text-muted hover:text-red-400 hover:bg-nexus-surface-2 transition-colors cursor-pointer"
             title="Cerrar sesión"
           >
             <LogOut className="w-4 h-4" />

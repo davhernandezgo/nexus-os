@@ -22,6 +22,26 @@
   --color-nexus-p4: #64748b;
 }
 
+:root {
+  --nexus-glass-bg: rgba(13, 17, 23, 0.85);
+}
+
+/* Light Theme Variables */
+html.light,
+[data-theme="light"],
+.light {
+  --color-nexus-bg: #F8FAFC;
+  --color-nexus-surface: #FFFFFF;
+  --color-nexus-surface-2: #F1F5F9;
+  --color-nexus-surface-3: #E2E8F0;
+  --color-nexus-border: rgba(203, 213, 225, 0.85);
+  --color-nexus-border-hover: rgba(148, 163, 184, 0.95);
+  --color-nexus-text: #0F172A;
+  --color-nexus-text-secondary: #334155;
+  --color-nexus-text-muted: #64748B;
+  --nexus-glass-bg: rgba(255, 255, 255, 0.92);
+}
+
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--color-nexus-surface-3) transparent;
@@ -38,6 +58,7 @@ body {
   overflow: hidden;
   height: 100vh;
   width: 100vw;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 #root {
@@ -54,10 +75,27 @@ body {
 
 /* Utility for glass effect panels */
 .glass-panel {
-  background: rgba(13, 17, 23, 0.8);
+  background: var(--nexus-glass-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--color-nexus-border);
+}
+
+/* Light mode specific input improvements */
+html.light input,
+html.light textarea,
+html.light select,
+.light input,
+.light textarea,
+.light select {
+  color: #0F172A;
+}
+
+html.light input::placeholder,
+html.light textarea::placeholder,
+.light input::placeholder,
+.light textarea::placeholder {
+  color: #94A3B8;
 }
 
 /* Priority badge colors */

@@ -73,10 +73,16 @@ export default function InvestmentsView() {
     addInvestment,
     deleteInvestment,
     currentOwner,
+    currentUser,
+    accounts,
     contextMode,
     switchContext,
     coupleSpace,
   } = useNexusStore();
+
+  const currentAccount = accounts.find(a => a.owner === currentOwner || a.id === currentUser?.id);
+  const currentDisplayName = currentUser?.displayName || currentAccount?.displayName || 'Personal';
+  const currentAvatar = currentAccount?.avatar || currentUser?.avatar || '👤';
 
   const investments = getVisibleInvestments();
 
@@ -352,9 +358,9 @@ export default function InvestmentsView() {
             <span>Ámbito de Vista</span>
             <Layers className="w-4 h-4 text-pink-400" />
           </div>
-          <div className="text-xl font-bold text-nexus-text capitalize">
+          <div className="text-xl font-bold text-nexus-text capitalize flex items-center gap-1.5">
             {contextMode === 'private'
-              ? `${currentOwner === 'david' ? '👨‍💻 David' : '👩‍🎨 Cami'} (Privado)`
+              ? `${currentDisplayName} (Privado)`
               : contextMode === 'couple'
               ? '💑 Conjuntas'
               : '✨ Portafolio Total'}
@@ -584,7 +590,7 @@ export default function InvestmentsView() {
                           </span>
                         ) : (
                           <span className="px-1.5 py-0.5 rounded-md bg-nexus-surface-3 border border-nexus-border text-nexus-text-muted text-[10px] font-mono">
-                            🔒 {inv.owner === 'david' ? 'David' : 'Cami'}
+                            🔒 {accounts.find(a => a.owner === inv.owner)?.displayName || (inv.owner === 'david' ? (coupleSpace?.user1Name || 'David') : inv.owner === 'cami' ? (coupleSpace?.user2Name || 'Cami') : currentDisplayName)}
                           </span>
                         )}
                       </div>
@@ -768,7 +774,7 @@ export default function InvestmentsView() {
                         : 'bg-nexus-surface-2 border-nexus-border text-nexus-text-muted hover:text-nexus-text'
                     }`}
                   >
-                    <span>🔒 Personal ({currentOwner === 'david' ? 'David' : 'Cami'})</span>
+                    <span>🔒 Personal ({currentDisplayName})</span>
                   </button>
 
                   <button

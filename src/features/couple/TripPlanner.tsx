@@ -41,6 +41,7 @@ export default function TripPlanner() {
     toggleTaskStatus,
     setSelectedTaskId,
     currentOwner,
+    accounts,
   } = useNexusStore();
 
   const [showAddModal, setShowAddModal] = useState(false);
@@ -327,7 +328,7 @@ export default function TripPlanner() {
 
                           <div className="flex items-center gap-1.5 flex-shrink-0">
                             <span className="text-[10px] px-1.5 py-0.5 rounded bg-nexus-surface-3 text-nexus-text-muted">
-                              {task.owner === 'david' ? '👨‍💻' : '👩‍🎨'}
+                              {accounts.find(a => a.owner === task.owner)?.avatar || (task.owner === 'david' ? '👨‍💻' : task.owner === 'cami' ? '👩‍🎨' : '👤')}
                             </span>
                           </div>
                         </div>

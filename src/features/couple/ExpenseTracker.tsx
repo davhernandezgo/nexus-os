@@ -60,12 +60,19 @@ export default function ExpenseTracker() {
     addExpense,
     deleteExpense,
     currentOwner,
+    currentUser,
+    accounts,
     categoryBudgets,
     getVisibleCategoryBudgets,
     addCategoryBudget,
     deleteCategoryBudget,
     coupleSpace,
   } = useNexusStore();
+
+  const currentAccount = accounts.find(a => a.owner === currentOwner || a.id === currentUser?.id);
+  const currentDisplayName = currentUser?.displayName || currentAccount?.displayName || 'tu cuenta';
+  const partner1Name = coupleSpace?.user1Name || 'David';
+  const partner2Name = coupleSpace?.user2Name || 'Cami';
 
   const allExpenses = getVisibleExpenses();
   const balance = getBalance();
@@ -376,7 +383,7 @@ export default function ExpenseTracker() {
               <div className="flex items-center gap-3">
                 <span className="text-2xl p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20">👨‍💻</span>
                 <div>
-                  <p className="text-xs text-nexus-text-muted font-medium">David Pagó</p>
+                  <p className="text-xs text-nexus-text-muted font-medium">{partner1Name} Pagó</p>
                   <p className="text-lg font-bold text-indigo-400">{formatCOP(balance.david)}</p>
                 </div>
               </div>
@@ -389,7 +396,7 @@ export default function ExpenseTracker() {
               <div className="flex items-center gap-3">
                 <span className="text-2xl p-2 rounded-xl bg-pink-500/10 border border-pink-500/20">👩‍🎨</span>
                 <div>
-                  <p className="text-xs text-nexus-text-muted font-medium">Cami Pagó</p>
+                  <p className="text-xs text-nexus-text-muted font-medium">{partner2Name} Pagó</p>
                   <p className="text-lg font-bold text-pink-400">{formatCOP(balance.cami)}</p>
                 </div>
               </div>
@@ -416,10 +423,10 @@ export default function ExpenseTracker() {
             <div className="flex justify-between text-xs text-nexus-text-muted font-medium">
               <span className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 inline-block" />
-                David ({davidPercent}%)
+                {partner1Name} ({davidPercent}%)
               </span>
               <span className="flex items-center gap-1.5">
-                Cami ({camiPercent}%)
+                {partner2Name} ({camiPercent}%)
                 <span className="w-2.5 h-2.5 rounded-full bg-pink-500 inline-block" />
               </span>
             </div>
@@ -484,7 +491,7 @@ export default function ExpenseTracker() {
             <div>
               <h2 className="text-xl font-bold text-nexus-text">Mi Presupuesto Personal</h2>
               <p className="text-xs text-nexus-text-muted">
-                Gastos privados y compras individuales de {currentOwner === 'david' ? 'David' : 'Cami'}.
+                Gastos privados y compras individuales de {currentDisplayName}.
               </p>
             </div>
           </div>
@@ -686,7 +693,7 @@ export default function ExpenseTracker() {
                   fastPaidBy === 'david' ? 'bg-indigo-600 text-white font-bold' : 'text-nexus-text-muted hover:text-nexus-text'
                 }`}
               >
-                David
+                {partner1Name}
               </button>
               <button
                 type="button"
@@ -695,7 +702,7 @@ export default function ExpenseTracker() {
                   fastPaidBy === 'cami' ? 'bg-pink-600 text-white font-bold' : 'text-nexus-text-muted hover:text-nexus-text'
                 }`}
               >
-                Cami
+                {partner2Name}
               </button>
             </div>
           </div>
@@ -909,7 +916,7 @@ export default function ExpenseTracker() {
               } else if (expense.splitType === 'exact') {
                 splitLabel = 'Exacto';
               } else if (expense.splitType === 'single') {
-                splitLabel = `100% ${expense.singleBeneficiary === 'david' ? 'David' : 'Cami'}`;
+                splitLabel = `100% ${expense.singleBeneficiary === 'david' ? partner1Name : partner2Name}`;
               }
 
               return (
@@ -1080,7 +1087,7 @@ export default function ExpenseTracker() {
                           : 'bg-nexus-surface-2 text-nexus-text-muted border-nexus-border hover:text-nexus-text'
                       }`}
                     >
-                      <span>👨‍💻 David</span>
+                      <span>👨‍💻 {partner1Name}</span>
                     </button>
                     <button
                       type="button"
@@ -1091,7 +1098,7 @@ export default function ExpenseTracker() {
                           : 'bg-nexus-surface-2 text-nexus-text-muted border-nexus-border hover:text-nexus-text'
                       }`}
                     >
-                      <span>👩‍🎨 Cami</span>
+                      <span>👩‍🎨 {partner2Name}</span>
                     </button>
                   </div>
                 </div>
@@ -1231,7 +1238,7 @@ export default function ExpenseTracker() {
                                 : 'bg-nexus-surface-3 text-nexus-text-muted border-nexus-border'
                             }`}
                           >
-                            David asume 100%
+                            {partner1Name} asume 100%
                           </button>
                           <button
                             type="button"
@@ -1242,7 +1249,7 @@ export default function ExpenseTracker() {
                                 : 'bg-nexus-surface-3 text-nexus-text-muted border-nexus-border'
                             }`}
                           >
-                            Cami asume 100%
+                            {partner2Name} asume 100%
                           </button>
                         </div>
                       </div>

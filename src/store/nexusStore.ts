@@ -44,14 +44,20 @@ export interface NexusStore {
   // UI state
   selectedTaskId: string | null;
   sidebarOpen: boolean;
+  sidebarCollapsed: boolean;
   commandPaletteOpen: boolean;
+  isProfileOpen: boolean;
   activeView: string;
+  theme: 'dark' | 'light';
 
   // ── Auth Actions ──
   login: (owner: Owner, pin: string) => boolean;
   setSupabaseUser: (user: any) => void;
+  updateProfile: (updates: { displayName?: string; avatar?: string; accentColor?: string }) => void;
   logout: () => void;
   switchContext: (mode: ContextMode) => void;
+  setTheme: (theme: 'dark' | 'light') => void;
+  toggleTheme: () => void;
 
   // ── Privacy Filter (THE critical function) ──
   getVisibleTasks: () => Task[];
@@ -136,7 +142,10 @@ export interface NexusStore {
   // ── UI ──
   setSelectedTaskId: (id: string | null) => void;
   setSidebarOpen: (open: boolean) => void;
+  setSidebarCollapsed: (collapsed: boolean) => void;
+  toggleSidebarCollapse: () => void;
   setCommandPaletteOpen: (open: boolean) => void;
+  setProfileOpen: (open: boolean) => void;
   setActiveView: (view: string) => void;
 
   // ── Init ──
@@ -182,26 +191,101 @@ export const useNexusStore = create<NexusStore>()(
 
       selectedTaskId: null,
       sidebarOpen: true,
+      sidebarCollapsed: false,
       commandPaletteOpen: false,
+      isProfileOpen: false,
       activeView: 'inbox',
+      theme: 'dark' as 'dark' | 'light',
 
       // ═══════════ AUTH ═══════════
       login: () => false,
+      setTheme: (theme) => {
+        set({ theme });
+        if (typeof document !== 'undefined') {
+          document.documentElement.classList.toggle('light', theme === 'light');
+          document.documentElement.setAttribute('data-theme', theme);
+        }
+      },
+      toggleTheme: () => {
+        const next = get().theme === 'dark' ? 'light' : 'dark';
+        get().setTheme(next);
+      },
+      setSidebarOpen: (open) => set({ sidebarOpen: open }),
+      setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
+      toggleSidebarCollapse: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
+      setProfileOpen: (open) => set({ isProfileOpen: open }),
+      updateProfile: (updates) => {
+        const { currentUser, currentOwner, accounts, coupleSpace } = get();
+        if (!currentUser && !currentOwner) return;
+
+        const updatedUser = currentUser
+          ? {
+              ...currentUser,
+              displayName: updates.displayName !== undefined ? updates.displayName : currentUser.displayName,
+              avatar: updates.avatar !== undefined ? updates.avatar : currentUser.avatar,
+            }
+          : null;
+
+        const updatedAccounts = accounts.map((a) => {
+          if (a.owner === currentOwner || a.id === currentUser?.id) {
+            return {
+              ...a,
+              displayName: updates.displayName !== undefined ? updates.displayName : a.displayName,
+              avatar: updates.avatar !== undefined ? updates.avatar : a.avatar,
+              accentColor: updates.accentColor !== undefined ? updates.accentColor : a.accentColor,
+            };
+          }
+          return a;
+        });
+
+        let updatedCoupleSpace = coupleSpace;
+        if (coupleSpace && currentUser) {
+          if (coupleSpace.user1Id === currentUser.id || coupleSpace.user1Id === currentOwner) {
+            updatedCoupleSpace = {
+              ...coupleSpace,
+              user1Name: updates.displayName !== undefined ? updates.displayName : coupleSpace.user1Name,
+            };
+          } else if (coupleSpace.user2Id === currentUser.id || coupleSpace.user2Id === currentOwner) {
+            updatedCoupleSpace = {
+              ...coupleSpace,
+              user2Name: updates.displayName !== undefined ? updates.displayName : coupleSpace.user2Name,
+            };
+          }
+        }
+
+        set({
+          currentUser: updatedUser,
+          accounts: updatedAccounts,
+          coupleSpace: updatedCoupleSpace,
+        });
+
+        if (supabase) {
+          supabase.auth
+            .updateUser({
+              data: {
+                full_name: updates.displayName,
+                name: updates.displayName,
+                avatar_url: updates.avatar,
+              },
+            })
+            .catch(() => {});
+        }
+      },
       setSupabaseUser: (user) => {
         if (!user) {
           set({ currentUser: null, currentOwner: null, isAuthenticated: false });
           return;
         }
         const email = user.email || '';
-        const fullName =
+        const rawName =
           user.user_metadata?.full_name ||
           user.user_metadata?.name ||
           user.user_metadata?.display_name ||
-          email.split('@')[0] ||
-          'Usuario';
+          (email ? email.split('@')[0] : 'Usuario');
+        const fullName = rawName;
         const avatar = user.user_metadata?.avatar_url || '👤';
         const isCami = email.toLowerCase().includes('cami');
-        const isDavid = email.toLowerCase().includes('david');
+        const isDavid = email.toLowerCase().includes('david') || email.toLowerCase().includes('dav');
         const ownerKey: Owner = isCami ? 'cami' : isDavid ? 'david' : user.id;
 
         const accounts = get().accounts || [];
@@ -236,7 +320,7 @@ export const useNexusStore = create<NexusStore>()(
           tags,
           accounts: existingAcc
             ? accounts.map(a => (a.owner === ownerKey || a.id === user.id ? { ...a, displayName: fullName, avatar } : a))
-            : [userAccount, ...accounts.filter(a => a.owner !== ownerKey)],
+            : [userAccount, ...accounts.filter(a => a.owner !== ownerKey && a.id !== user.id)],
         });
       },
       logout: () => {
@@ -850,7 +934,6 @@ export const useNexusStore = create<NexusStore>()(
 
       // ═══════════ UI ═══════════
       setSelectedTaskId: (id) => set({ selectedTaskId: id }),
-      setSidebarOpen: (open) => set({ sidebarOpen: open }),
       setCommandPaletteOpen: (open) => set({ commandPaletteOpen: open }),
       setActiveView: (view) => set({ activeView: view }),
 
@@ -894,6 +977,7 @@ export const useNexusStore = create<NexusStore>()(
         // Exclude transient UI state from persistence for instantaneous modal opening/closing
         const {
           commandPaletteOpen,
+          isProfileOpen,
           selectedTaskId,
           sidebarOpen,
           timer,
