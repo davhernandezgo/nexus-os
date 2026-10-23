@@ -13,6 +13,8 @@ import {
   ExternalLink,
   Sparkles,
   Camera,
+  Trash2,
+  AlertTriangle,
 } from 'lucide-react';
 import { useNexusStore } from '../../store/nexusStore';
 import { useNavigate } from 'react-router-dom';
@@ -43,6 +45,7 @@ export const ProfileModal: React.FC = () => {
     setTheme,
     updateProfile,
     logout,
+    deleteAccountAndReset,
   } = useNexusStore();
 
   const navigate = useNavigate();
@@ -53,6 +56,8 @@ export const ProfileModal: React.FC = () => {
   const [avatar, setAvatar] = useState('👤');
   const [accentColor, setAccentColor] = useState('#6366f1');
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (isProfileOpen) {
@@ -60,8 +65,22 @@ export const ProfileModal: React.FC = () => {
       setAvatar(currentAccount?.avatar || currentUser?.avatar || '👤');
       setAccentColor(currentAccount?.accentColor || '#6366f1');
       setSavedSuccess(false);
+      setIsConfirmingDelete(false);
+      setIsDeleting(false);
     }
   }, [isProfileOpen, currentUser, currentAccount]);
+
+  const handleDeleteAccount = async () => {
+    setIsDeleting(true);
+    try {
+      await deleteAccountAndReset();
+      setProfileOpen(false);
+      navigate('/login');
+    } catch (err) {
+      console.error('Error al eliminar cuenta:', err);
+      setIsDeleting(false);
+    }
+  };
 
   if (!isProfileOpen) return null;
 
@@ -301,6 +320,57 @@ export const ProfileModal: React.FC = () => {
                 <span>{coupleSpace?.status === 'active' ? 'Ver Hub' : 'Vincular'}</span>
                 <ExternalLink className="w-3.5 h-3.5" />
               </button>
+            </div>
+
+            {/* Danger Zone: Eliminar Cuenta & Empezar de Cero */}
+            <div className="p-4 rounded-2xl bg-rose-500/5 border border-rose-500/20 space-y-3">
+              <div className="flex items-start gap-2.5">
+                <AlertTriangle className="w-4 h-4 text-rose-400 mt-0.5 shrink-0" />
+                <div>
+                  <h4 className="text-xs font-bold text-rose-400">Zona de Peligro: Reiniciar / Eliminar Cuenta</h4>
+                  <p className="text-[11px] text-nexus-text-muted mt-0.5 leading-relaxed">
+                    Si deseas empezar completamente desde cero, puedes eliminar tu cuenta y todos tus datos (tareas, hábitos, notas diarias, finanzas y preferencias).
+                  </p>
+                </div>
+              </div>
+
+              {!isConfirmingDelete ? (
+                <button
+                  type="button"
+                  onClick={() => setIsConfirmingDelete(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-semibold transition cursor-pointer"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Eliminar Cuenta & Empezar de Cero</span>
+                </button>
+              ) : (
+                <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 space-y-2">
+                  <p className="text-xs font-semibold text-rose-300">
+                    ⚠️ ¿Confirmas que deseas eliminar tu cuenta permanentemente?
+                  </p>
+                  <p className="text-[11px] text-nexus-text-muted">
+                    Esta acción es irreversible y borrará todos tus registros para que puedas comenzar de nuevo con un lienzo limpio.
+                  </p>
+                  <div className="flex items-center gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={handleDeleteAccount}
+                      disabled={isDeleting}
+                      className="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition shadow-sm flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>{isDeleting ? 'Eliminando...' : 'Sí, eliminar todo y reiniciar'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsConfirmingDelete(false)}
+                      className="px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 text-nexus-text-muted hover:text-nexus-text text-xs transition cursor-pointer"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Action Buttons */}

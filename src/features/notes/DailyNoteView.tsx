@@ -323,6 +323,7 @@ export default function DailyNoteView() {
   const {
     dailyNotes,
     upsertDailyNote,
+    deleteDailyNote,
     currentOwner,
     currentUser,
     accounts,
@@ -366,17 +367,7 @@ export default function DailyNoteView() {
   }, [dailyNotes, currentDateStr, currentOwner, currentUser?.id]);
 
   useEffect(() => {
-    const ownerId = currentOwner || currentUser?.id || 'user';
-    if (!note && (currentOwner || currentUser?.id)) {
-      const newNote: DailyNote = {
-        id: `dn-${ownerId}-${currentDateStr}`,
-        date: currentDateStr,
-        owner: ownerId,
-        content: getLifeOSSkeleton(),
-        wikiLinks: [],
-      };
-      upsertDailyNote(newNote);
-    } else if (note?.content) {
+    if (note?.content) {
       // Auto-sanitize existing notes in browser storage that still contain legacy mock text
       const hasLegacyMock = note.content.some(b =>
         typeof b.content === 'string' && (
@@ -393,11 +384,10 @@ export default function DailyNoteView() {
         });
       }
     }
-  }, [currentDateStr, note, currentOwner, currentUser?.id, upsertDailyNote]);
+  }, [note, upsertDailyNote]);
 
   const activeContent: PageBlock[] = useMemo(() => {
-    if (note?.content && note.content.length > 0) return note.content;
-    return getLifeOSSkeleton();
+    return note?.content || [];
   }, [note?.content]);
 
   // Sync markdownText whenever note, activeContent, or editorMode changes
@@ -425,6 +415,44 @@ export default function DailyNoteView() {
       content: newBlocks,
       wikiLinks: combinedWikiLinks,
     });
+  };
+
+  type DailySkeletonType = 'lifeos' | 'minimal' | 'deepwork' | 'wellness' | 'couple' | 'weekly' | 'clean';
+
+  const handleCreateDailyNote = (templateKey: DailySkeletonType = 'lifeos') => {
+    const ownerId = currentOwner || currentUser?.id || 'user';
+    let skeleton: PageBlock[] = [];
+    switch (templateKey) {
+      case 'lifeos': skeleton = getLifeOSSkeleton(); break;
+      case 'minimal': skeleton = getMinimalistSkeleton(); break;
+      case 'deepwork': skeleton = getDeepWorkSprintSkeleton(); break;
+      case 'wellness': skeleton = getWellnessHabitsSkeleton(); break;
+      case 'couple': skeleton = getSharedCoupleSkeleton(); break;
+      case 'weekly': skeleton = getWeeklyReviewSkeleton(); break;
+      case 'clean': skeleton = getCleanBlankSkeleton(); break;
+      default: skeleton = getLifeOSSkeleton();
+    }
+    const newNote: DailyNote = {
+      id: `dn-${ownerId}-${currentDateStr}`,
+      date: currentDateStr,
+      owner: ownerId,
+      content: skeleton,
+      wikiLinks: [],
+    };
+    upsertDailyNote(newNote);
+    setMarkdownText(blocksToMarkdown(skeleton));
+  };
+
+  const handleDeleteDailyNote = () => {
+    if (!note) return;
+    if (
+      window.confirm(
+        `¿Deseas eliminar la nota diaria del ${formattedDateHeader}? Se borrará del sistema y no quedará guardada en tus notas ni en el grafo de conocimiento.`
+      )
+    ) {
+      deleteDailyNote(note.id);
+      setMarkdownText('');
+    }
   };
 
   const handleUpdateBlock = (index: number, updates: Partial<PageBlock>) => {
@@ -500,8 +528,6 @@ export default function DailyNoteView() {
     updateNoteContent(newBlocks);
     setSlashMenuBlockIndex(null);
   };
-
-  type DailySkeletonType = 'lifeos' | 'minimal' | 'deepwork' | 'wellness' | 'couple' | 'weekly' | 'clean';
 
   const handleApplyTemplate = (templateName: DailySkeletonType) => {
     if (
@@ -790,45 +816,143 @@ export default function DailyNoteView() {
           <p className="text-sm font-medium text-nexus-text-secondary">{formattedDateHeader}</p>
         </div>
 
-        {/* Date switcher controls */}
-        <div className="flex items-center gap-2 self-start sm:self-center bg-nexus-surface border border-nexus-border p-1 rounded-2xl shadow-lg">
-          <button
-            onClick={handlePrevDay}
-            className="p-2 rounded-xl text-nexus-text-muted hover:text-nexus-text hover:bg-nexus-surface-2 transition cursor-pointer"
-            title="Día anterior"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
+        {/* Date switcher & Delete controls */}
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-center">
+          {note && (
+            <button
+              type="button"
+              onClick={handleDeleteDailyNote}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-semibold transition cursor-pointer"
+              title="Eliminar la nota de este día para que no quede guardada"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Eliminar Nota</span>
+            </button>
+          )}
 
-          <button
-            onClick={handleToday}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
-              isToday(parseISO(currentDateStr))
-                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20'
-                : 'text-nexus-text-muted hover:text-nexus-text hover:bg-nexus-surface-2'
-            }`}
-          >
-            Hoy
-          </button>
+          <div className="flex items-center gap-2 bg-nexus-surface border border-nexus-border p-1 rounded-2xl shadow-lg">
+            <button
+              onClick={handlePrevDay}
+              className="p-2 rounded-xl text-nexus-text-muted hover:text-nexus-text hover:bg-nexus-surface-2 transition cursor-pointer"
+              title="Día anterior"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
 
-          <input
-            type="date"
-            value={currentDateStr}
-            onChange={e => e.target.value && setCurrentDateStr(e.target.value)}
-            className="px-2.5 py-1 text-xs rounded-xl bg-nexus-surface-2 border border-nexus-border text-nexus-text focus:outline-none focus:border-indigo-500 font-mono"
-          />
+            <button
+              onClick={handleToday}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
+                isToday(parseISO(currentDateStr))
+                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20'
+                  : 'text-nexus-text-muted hover:text-nexus-text hover:bg-nexus-surface-2'
+              }`}
+            >
+              Hoy
+            </button>
 
-          <button
-            onClick={handleNextDay}
-            className="p-2 rounded-xl text-nexus-text-muted hover:text-nexus-text hover:bg-nexus-surface-2 transition cursor-pointer"
-            title="Día siguiente"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
+            <input
+              type="date"
+              value={currentDateStr}
+              onChange={e => e.target.value && setCurrentDateStr(e.target.value)}
+              className="px-2.5 py-1 text-xs rounded-xl bg-nexus-surface-2 border border-nexus-border text-nexus-text focus:outline-none focus:border-indigo-500 font-mono"
+            />
+
+            <button
+              onClick={handleNextDay}
+              className="p-2 rounded-xl text-nexus-text-muted hover:text-nexus-text hover:bg-nexus-surface-2 transition cursor-pointer"
+              title="Día siguiente"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* ─── Templates Bar & Progress Stats ─────────────────────── */}
+      {!note ? (
+        /* Empty State: Sin nota creada para este día */
+        <div className="p-8 sm:p-12 rounded-3xl bg-nexus-surface border border-nexus-border shadow-xl text-center space-y-6">
+          <div className="w-16 h-16 rounded-3xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center mx-auto text-2xl shadow-inner">
+            📝
+          </div>
+          <div className="max-w-md mx-auto space-y-2">
+            <h3 className="text-xl font-bold text-nexus-text">Sin nota registrada para este día</h3>
+            <p className="text-xs text-nexus-text-muted leading-relaxed">
+              No has creado una nota para el <span className="text-nexus-text font-medium">{formattedDateHeader}</span>.
+              Si hoy no tienes nada que registrar, puedes dejarlo libre para que no queden notas vacías en tu historial ni en el grafo.
+            </p>
+          </div>
+
+          <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={() => handleCreateDailyNote('lifeos')}
+              className="w-full sm:w-auto px-5 py-2.5 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:opacity-95 text-white text-xs font-bold transition shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <Sparkles className="w-4 h-4" />
+              <span>Comenzar con Master LifeOS</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleCreateDailyNote('clean')}
+              className="w-full sm:w-auto px-4 py-2.5 rounded-2xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-nexus-text text-xs font-semibold transition flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <FileText className="w-4 h-4 text-slate-400" />
+              <span>Hoja en Blanco</span>
+            </button>
+          </div>
+
+          <div className="pt-4 border-t border-nexus-border/60">
+            <p className="text-[11px] font-semibold text-nexus-text-muted uppercase tracking-wider mb-3">
+              O crea la nota con otra plantilla:
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <button
+                type="button"
+                onClick={() => handleCreateDailyNote('minimal')}
+                className="px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs text-nexus-text flex items-center gap-1.5 transition cursor-pointer"
+              >
+                <Target className="w-3.5 h-3.5 text-cyan-400" />
+                <span>🎯 Enfoque Esencial</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleCreateDailyNote('deepwork')}
+                className="px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs text-nexus-text flex items-center gap-1.5 transition cursor-pointer"
+              >
+                <Code className="w-3.5 h-3.5 text-amber-400" />
+                <span>💻 Deep Work & Sprint</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleCreateDailyNote('wellness')}
+                className="px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs text-nexus-text flex items-center gap-1.5 transition cursor-pointer"
+              >
+                <Heart className="w-3.5 h-3.5 text-emerald-400" />
+                <span>🌿 Bienestar & Hábitos</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleCreateDailyNote('couple')}
+                className="px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs text-nexus-text flex items-center gap-1.5 transition cursor-pointer"
+              >
+                <Share2 className="w-3.5 h-3.5 text-pink-400" />
+                <span>💑 Pareja & Hogar</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleCreateDailyNote('weekly')}
+                className="px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs text-nexus-text flex items-center gap-1.5 transition cursor-pointer"
+              >
+                <FolderKanban className="w-3.5 h-3.5 text-purple-400" />
+                <span>📈 Retrospectiva Semanal</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* ─── Templates Bar & Progress Stats ─────────────────────── */}
       <div className="p-4 rounded-2xl bg-nexus-surface border border-nexus-border shadow-lg space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2">
@@ -1632,6 +1756,8 @@ export default function DailyNoteView() {
           )}
         </div>
       </div>
+    </>
+  )}
 
       {/* ─── Modal de Crear / Guardar Plantilla Personalizada ─── */}
       <CreateTemplateModal

@@ -55,6 +55,7 @@ export interface NexusStore {
   setSupabaseUser: (user: any) => void;
   updateProfile: (updates: { displayName?: string; avatar?: string; accentColor?: string }) => void;
   logout: () => void;
+  deleteAccountAndReset: () => Promise<void>;
   switchContext: (mode: ContextMode) => void;
   setTheme: (theme: 'dark' | 'light') => void;
   toggleTheme: () => void;
@@ -127,6 +128,7 @@ export interface NexusStore {
   // ── Daily Notes ──
   getDailyNote: (date: string) => DailyNote | undefined;
   upsertDailyNote: (note: DailyNote) => void;
+  deleteDailyNote: (id: string) => void;
 
   // ── Templates ──
   addCustomTemplate: (template: TaskTemplate) => void;
@@ -326,6 +328,43 @@ export const useNexusStore = create<NexusStore>()(
           supabase.auth.signOut().catch(() => {});
         }
         set({ currentOwner: null, currentUser: null, isAuthenticated: false, contextMode: 'private' });
+      },
+      deleteAccountAndReset: async () => {
+        if (supabase) {
+          try {
+            await supabase.auth.signOut();
+          } catch (e) {
+            console.error('Error signing out Supabase:', e);
+          }
+        }
+        try {
+          localStorage.removeItem('nexus-os-store');
+          localStorage.clear();
+        } catch (e) {
+          console.error('Error clearing localStorage:', e);
+        }
+        set({
+          currentUser: null,
+          currentOwner: null,
+          isAuthenticated: false,
+          accounts: [],
+          coupleSpace: null,
+          categoryBudgets: [],
+          investments: [],
+          tasks: [],
+          projects: [],
+          habits: [],
+          expenses: [],
+          tripPlans: [],
+          sharedNotes: [],
+          dailyNotes: [],
+          notifications: [],
+          customTemplates: [],
+          timeLogs: [],
+          tags: [],
+          contextMode: 'private',
+          isProfileOpen: false,
+        });
       },
       switchContext: (mode) => set({ contextMode: mode }),
 
@@ -910,6 +949,10 @@ export const useNexusStore = create<NexusStore>()(
           }
           return { dailyNotes: [...s.dailyNotes, note] };
         }),
+      deleteDailyNote: (id) =>
+        set(s => ({
+          dailyNotes: s.dailyNotes.filter(n => n.id !== id),
+        })),
 
       // ═══════════ TEMPLATES ═══════════
       addCustomTemplate: (template) =>
