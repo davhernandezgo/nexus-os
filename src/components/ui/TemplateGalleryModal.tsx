@@ -21,6 +21,7 @@ import {
   List,
   Code,
   Info,
+  Plane,
 } from 'lucide-react';
 import { useNexusStore } from '../../store/nexusStore';
 import { BUILTIN_TEMPLATES } from '../../services/templates';
@@ -39,6 +40,7 @@ interface TemplateGalleryModalProps {
 const CATEGORY_TABS: { id: TemplateCategory; label: string; icon: any }[] = [
   { id: 'all', label: 'Todas', icon: Layers },
   { id: 'daily', label: 'Diarias', icon: Calendar },
+  { id: 'travel', label: 'Viajes', icon: Plane },
   { id: 'work', label: 'Trabajo', icon: Briefcase },
   { id: 'personal', label: 'Personal', icon: User },
   { id: 'health', label: 'Salud', icon: Heart },

@@ -126,7 +126,7 @@ export interface PageBlock {
 }
 
 // ─── Templates (Page templates) ─────────────────────────────────
-export type TemplateCategory = 'all' | 'daily' | 'work' | 'couple' | 'personal' | 'health' | 'finance' | 'custom';
+export type TemplateCategory = 'all' | 'daily' | 'work' | 'couple' | 'travel' | 'personal' | 'health' | 'finance' | 'custom';
 
 export interface TaskTemplate {
   id: string;

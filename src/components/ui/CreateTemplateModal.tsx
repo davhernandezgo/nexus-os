@@ -32,6 +32,7 @@ interface CreateTemplateModalProps {
 
 const CATEGORIES: { id: TemplateCategory; label: string; icon: string }[] = [
   { id: 'work', label: 'Trabajo & Tech', icon: '💼' },
+  { id: 'travel', label: 'Viajes & Aventura', icon: '✈️' },
   { id: 'couple', label: 'Pareja & Hogar', icon: '💑' },
   { id: 'personal', label: 'Personal', icon: '🔒' },
   { id: 'health', label: 'Salud & Bienestar', icon: '🥗' },
