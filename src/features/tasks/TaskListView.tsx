@@ -41,6 +41,7 @@ export default function TaskListView() {
     addTask,
     startTimer,
     currentOwner,
+    currentUser,
   } = useNexusStore();
 
   const visibleTasks = getVisibleTasks();
@@ -177,7 +178,7 @@ export default function TaskListView() {
       description: '',
       status: 'todo',
       priority: parsed.priority || 'P2',
-      owner: currentOwner || 'david',
+      owner: currentOwner || currentUser?.id || 'user',
       visibility: parsed.visibility || 'private',
       projectId: quickProject !== 'none' ? quickProject : undefined,
       subtaskIds: [],

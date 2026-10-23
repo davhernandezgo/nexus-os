@@ -45,7 +45,7 @@ export default function CreateTemplateModal({
   initialMarkdown = '',
   onSaveSuccess,
 }: CreateTemplateModalProps) {
-  const { addCustomTemplate, currentOwner } = useNexusStore();
+  const { addCustomTemplate, currentOwner, currentUser } = useNexusStore();
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -133,7 +133,7 @@ export default function CreateTemplateModal({
       blocks: blocks.length > 0 ? blocks : [{ id: `b-${uuidv4().slice(0, 6)}`, type: 'paragraph', content: markdown }],
       markdown,
       isCustom: true,
-      owner: currentOwner || 'david',
+      owner: currentOwner || currentUser?.id || 'user',
       createdAt: new Date().toISOString(),
     };
 

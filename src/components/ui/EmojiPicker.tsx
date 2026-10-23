@@ -97,7 +97,7 @@ export const EMOJI_DATABASE: EmojiCategory[] = [
     icon: '💑',
     emojis: [
       { char: '💑', name: 'Pareja con corazón', keywords: ['pareja', 'amor', 'novios', 'esposos', 'juntos'] },
-      { char: '👩‍❤️‍👨', name: 'Pareja mujer y hombre', keywords: ['pareja', 'david', 'cami', 'amor'] },
+      { char: '👩‍❤️‍👨', name: 'Pareja mujer y hombre', keywords: ['pareja', 'novios', 'esposos', 'amor'] },
       { char: '💏', name: 'Beso de pareja', keywords: ['beso', 'amor', 'romance', 'afecto'] },
       { char: '💖', name: 'Corazón brillante', keywords: ['corazon', 'amor', 'brillo', 'especial', 'cuidado'] },
       { char: '💗', name: 'Corazón creciente', keywords: ['amor', 'afecto', 'crecimiento', 'cuidado'] },

@@ -41,6 +41,7 @@ export default function CalendarView() {
     toggleTaskStatus,
     addTask,
     currentOwner,
+    currentUser,
   } = useNexusStore();
 
   const visibleTasks = getVisibleTasks();
@@ -111,7 +112,7 @@ export default function CalendarView() {
       description: '',
       status: 'todo',
       priority: 'P2',
-      owner: currentOwner || 'david',
+      owner: currentOwner || currentUser?.id || 'user',
       visibility: 'private',
       subtaskIds: [],
       tags: [],

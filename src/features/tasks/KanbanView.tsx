@@ -77,6 +77,7 @@ export default function KanbanView() {
     updateTask,
     addTask,
     currentOwner,
+    currentUser,
     accounts,
   } = useNexusStore();
 
@@ -221,7 +222,7 @@ export default function KanbanView() {
       description: '',
       status,
       priority: 'P2',
-      owner: currentOwner || 'david',
+      owner: currentOwner || currentUser?.id || 'user',
       visibility: 'private',
       projectId: projectFilter !== 'all' && projectFilter !== 'none' ? projectFilter : undefined,
       subtaskIds: [],
@@ -457,7 +458,7 @@ export default function KanbanView() {
                                   className="w-5 h-5 rounded-full bg-nexus-surface-3 text-nexus-text-muted flex items-center justify-center text-[11px]"
                                   title={`Asignada a ${task.owner}`}
                                 >
-                                  {accounts.find(a => a.owner === task.owner)?.avatar || (task.owner === 'david' ? '👨‍💻' : task.owner === 'cami' ? '👩‍🎨' : '👤')}
+                                  {accounts.find(a => a.owner === task.owner)?.avatar || '👤'}
                                 </span>
                               )}
                             </div>

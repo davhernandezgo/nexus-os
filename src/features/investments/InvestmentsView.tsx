@@ -83,6 +83,8 @@ export default function InvestmentsView() {
   const currentAccount = accounts.find(a => a.owner === currentOwner || a.id === currentUser?.id);
   const currentDisplayName = currentUser?.displayName || currentAccount?.displayName || 'Personal';
   const currentAvatar = currentAccount?.avatar || currentUser?.avatar || '👤';
+  const partner1Name = coupleSpace?.user1Name || 'Usuario 1';
+  const partner2Name = coupleSpace?.user2Name || 'Usuario 2';
 
   const investments = getVisibleInvestments();
 
@@ -236,7 +238,7 @@ export default function InvestmentsView() {
       amountUsd: parsedAmount,
       category,
       date,
-      owner: currentOwner || 'david',
+      owner: currentOwner || currentUser?.id || 'user',
       visibility,
       platform: platform.trim() || undefined,
       notes: notes.trim() || undefined,
@@ -367,7 +369,7 @@ export default function InvestmentsView() {
           </div>
           <div className="text-[11px] text-nexus-text-muted">
             {contextMode === 'couple'
-              ? `Aportes: David ${coupleStats.davidPct}% • Cami ${coupleStats.camiPct}%`
+              ? `Aportes: ${partner1Name} ${coupleStats.davidPct}% • ${partner2Name} ${coupleStats.camiPct}%`
               : 'Aislado criptográficamente'}
           </div>
         </div>
@@ -590,7 +592,7 @@ export default function InvestmentsView() {
                           </span>
                         ) : (
                           <span className="px-1.5 py-0.5 rounded-md bg-nexus-surface-3 border border-nexus-border text-nexus-text-muted text-[10px] font-mono">
-                            🔒 {accounts.find(a => a.owner === inv.owner)?.displayName || (inv.owner === 'david' ? (coupleSpace?.user1Name || 'David') : inv.owner === 'cami' ? (coupleSpace?.user2Name || 'Cami') : currentDisplayName)}
+                            🔒 {accounts.find(a => a.owner === inv.owner)?.displayName || (inv.owner === 'david' ? partner1Name : inv.owner === 'cami' ? partner2Name : currentDisplayName)}
                           </span>
                         )}
                       </div>
@@ -618,7 +620,7 @@ export default function InvestmentsView() {
                       <div className="text-base font-extrabold text-nexus-text">{formatUSD(inv.amountUsd)}</div>
                       {inv.visibility === 'couple' && inv.contributions && (
                         <div className="text-[10px] text-nexus-text-muted">
-                          D: {formatUSD(inv.contributions.david)} • C: {formatUSD(inv.contributions.cami)}
+                          {partner1Name.slice(0, 1)}: {formatUSD(inv.contributions.david)} • {partner2Name.slice(0, 1)}: {formatUSD(inv.contributions.cami)}
                         </div>
                       )}
                     </div>
@@ -826,7 +828,7 @@ export default function InvestmentsView() {
                   {splitMode === 'custom' && (
                     <div className="grid grid-cols-2 gap-2 pt-1">
                       <div>
-                        <label className="text-[11px] text-nexus-text-muted block mb-1">Aporte David ($)</label>
+                        <label className="text-[11px] text-nexus-text-muted block mb-1">Aporte {coupleSpace?.user1Name || 'Usuario 1'} ($)</label>
                         <input
                           type="number"
                           step="0.01"
@@ -837,7 +839,7 @@ export default function InvestmentsView() {
                         />
                       </div>
                       <div>
-                        <label className="text-[11px] text-nexus-text-muted block mb-1">Aporte Cami ($)</label>
+                        <label className="text-[11px] text-nexus-text-muted block mb-1">Aporte {coupleSpace?.user2Name || 'Usuario 2'} ($)</label>
                         <input
                           type="number"
                           step="0.01"

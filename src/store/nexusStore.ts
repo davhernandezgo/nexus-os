@@ -284,9 +284,7 @@ export const useNexusStore = create<NexusStore>()(
           (email ? email.split('@')[0] : 'Usuario');
         const fullName = rawName;
         const avatar = user.user_metadata?.avatar_url || '👤';
-        const isCami = email.toLowerCase().includes('cami');
-        const isDavid = email.toLowerCase().includes('david') || email.toLowerCase().includes('dav');
-        const ownerKey: Owner = isCami ? 'cami' : isDavid ? 'david' : user.id;
+        const ownerKey: Owner = user.id;
 
         const accounts = get().accounts || [];
         const existingAcc = accounts.find(a => a.id === user.id || a.owner === ownerKey);
@@ -296,7 +294,7 @@ export const useNexusStore = create<NexusStore>()(
           displayName: fullName,
           avatar,
           pin: '0000',
-          accentColor: isCami ? '#ec4899' : '#6366f1',
+          accentColor: '#6366f1',
         };
 
         const currentTags = get().tags || [];
@@ -639,7 +637,7 @@ export const useNexusStore = create<NexusStore>()(
             const timeLog: TimeLog = {
               id: `tl-${Date.now()}`,
               taskId: t.targetId,
-              owner: get().currentOwner || 'david',
+              owner: get().currentOwner || get().currentUser?.id || 'user',
               startedAt: t.startedAt,
               endedAt: new Date().toISOString(),
               durationMinutes,
@@ -743,9 +741,9 @@ export const useNexusStore = create<NexusStore>()(
       // ═══════════ COUPLE HUB & PARTNERSHIP ═══════════
       createCoupleSpace: (name = 'Espacio de Pareja', defaultRatio = { david: 50, cami: 50 }) => {
         const randomCode = `COUPLE-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
-        const currentOwner = get().currentOwner || 'david';
+        const currentOwner = get().currentOwner || get().currentUser?.id || 'user';
         const currentUser = get().currentUser;
-        const currentAccount = get().accounts.find(a => a.owner === currentOwner);
+        const currentAccount = get().accounts.find(a => a.owner === currentOwner || a.id === currentUser?.id);
         const userName = currentAccount?.displayName || currentUser?.displayName || 'Usuario 1';
         const userId = currentAccount?.id || currentUser?.id || 'acc-user1';
 
@@ -764,9 +762,9 @@ export const useNexusStore = create<NexusStore>()(
       },
       joinCoupleSpace: (code) => {
         const current = get().coupleSpace;
-        const currentOwner = get().currentOwner || 'cami';
+        const currentOwner = get().currentOwner || get().currentUser?.id || 'user';
         const currentUser = get().currentUser;
-        const currentAccount = get().accounts.find(a => a.owner === currentOwner);
+        const currentAccount = get().accounts.find(a => a.owner === currentOwner || a.id === currentUser?.id);
         const userName = currentAccount?.displayName || currentUser?.displayName || 'Usuario 2';
         const userId = currentAccount?.id || currentUser?.id || 'acc-user2';
 

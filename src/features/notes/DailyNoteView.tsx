@@ -199,77 +199,124 @@ const markdownToBlocks = (md: string): PageBlock[] => {
   return blocks;
 };
 
-// ─── Exhaustive Daily Note Templates ──────────────────────────────
-const getLifeOSTemplate = (): PageBlock[] => [
+// ─── Clean Skeletons & Frameworks (Pure structure, zero dummy text) ──
+const getLifeOSSkeleton = (): PageBlock[] => [
   { id: uuidv4(), type: 'heading2', content: '🌅 1. ENFOQUE MATUTINO & INTENCIÓN' },
   {
     id: uuidv4(),
     type: 'callout',
-    content: '☀️ Intención del día: Concentración plena en lo esencial, cero distracciones y cuidar el bienestar personal y en pareja.',
+    content: '🎯 Intención del día: ',
     calloutType: 'info',
   },
-  { id: uuidv4(), type: 'heading2', content: '🎯 2. TOP 3 OBJETIVOS PRIORITARIOS (Must-Do)' },
-  { id: uuidv4(), type: 'todo', content: '🚀 Objetivo 1: Avance crítico en microservicio / módulo principal', checked: false },
-  { id: uuidv4(), type: 'todo', content: '⚡ Objetivo 2: Resolver tarea bloqueante o bugfix urgente', checked: false },
-  { id: uuidv4(), type: 'todo', content: '🌿 Objetivo 3: Sesión de hábitos y bienestar de calidad', checked: false },
+  { id: uuidv4(), type: 'heading2', content: '🎯 2. TOP 3 PRIORIDADES (Must-Do)' },
+  { id: uuidv4(), type: 'todo', content: '🚀 Prioridad 1: ', checked: false },
+  { id: uuidv4(), type: 'todo', content: '⚡ Prioridad 2: ', checked: false },
+  { id: uuidv4(), type: 'todo', content: '🌿 Prioridad 3: ', checked: false },
   { id: uuidv4(), type: 'heading2', content: '⚡ 3. BLOQUES DE TIEMPO & AGENDA' },
-  { id: uuidv4(), type: 'todo', content: '☕ 08:30 - 10:30 | Deep Work: Arquitectura y código sin interrupciones', checked: false },
-  { id: uuidv4(), type: 'todo', content: '💻 11:00 - 12:30 | Revisión de pull requests, emails y coordinación', checked: false },
-  { id: uuidv4(), type: 'todo', content: '🥗 13:00 - 14:00 | Almuerzo tranquilo sin pantallas', checked: false },
-  { id: uuidv4(), type: 'todo', content: '🛠️ 14:30 - 17:00 | Desarrollo y pruebas en entorno local', checked: false },
-  { id: uuidv4(), type: 'todo', content: '🏃 17:30 - 18:30 | Actividad física, estiramientos o caminata', checked: false },
-  { id: uuidv4(), type: 'todo', content: '💑 19:30 - 21:30 | Cena y tiempo de calidad con Cami / David', checked: false },
-  { id: uuidv4(), type: 'heading2', content: '💡 4. BITÁCORA TÉCNICA & APRENDIZAJES' },
-  { id: uuidv4(), type: 'paragraph', content: 'Documenta aquí descubrimientos técnicos, decisiones de base de datos o comandos clave del día...' },
-  { id: uuidv4(), type: 'code', content: '// Snippet técnico de referencia rápida\ngit status && npm run test', language: 'bash' },
-  { id: uuidv4(), type: 'heading2', content: '💑 5. ACUERDOS & NOTAS DE PAREJA' },
-  { id: uuidv4(), type: 'todo', content: '🛒 Coordinar compras o pendientes del hogar', checked: false },
-  { id: uuidv4(), type: 'todo', content: '✈️ Revisión del presupuesto o planes de viaje', checked: false },
-  { id: uuidv4(), type: 'heading2', content: '🏆 6. VICTORIAS DEL DÍA & REFLEXIÓN NOCTURNA' },
+  { id: uuidv4(), type: 'todo', content: '🌅 Mañana (08:00 - 12:00) | Enfoque principal: ', checked: false },
+  { id: uuidv4(), type: 'todo', content: '☀️ Mediodía (12:00 - 14:00) | Almuerzo & Pausa: ', checked: false },
+  { id: uuidv4(), type: 'todo', content: '🌇 Tarde (14:00 - 18:00) | Tareas & Seguimiento: ', checked: false },
+  { id: uuidv4(), type: 'todo', content: '🌙 Noche (18:00 - 22:00) | Desconexión & Descanso: ', checked: false },
+  { id: uuidv4(), type: 'heading2', content: '💡 4. BITÁCORA & NOTAS' },
+  { id: uuidv4(), type: 'paragraph', content: '' },
+  { id: uuidv4(), type: 'heading2', content: '🏆 5. VICTORIAS DEL DÍA & GRATITUD' },
   {
     id: uuidv4(),
     type: 'callout',
-    content: '🌟 3 cosas por las que doy gracias hoy: 1) Buena salud y energía, 2) Trabajo con propósito, 3) Paz en el hogar.',
+    content: '🌟 3 Victorias o Agradecimientos de hoy:\n1) \n2) \n3) ',
     calloutType: 'info',
   },
 ];
 
-const getTechSprintTemplate = (): PageBlock[] => [
-  { id: uuidv4(), type: 'heading2', content: '💻 SPRINT DE INGENIERÍA & ARQUITECTURA' },
+const getMinimalistSkeleton = (): PageBlock[] => [
+  { id: uuidv4(), type: 'heading2', content: '🎯 ENFOQUE ESENCIAL' },
   {
     id: uuidv4(),
     type: 'callout',
-    content: '🔥 Objetivo del sprint: Entregar código limpio, tests unitarios pasando y 0 errores en build.',
+    content: '🎯 El único resultado que definirá el éxito de hoy: ',
     calloutType: 'info',
   },
-  { id: uuidv4(), type: 'heading3', content: '🎯 Tareas Críticas de Código' },
-  { id: uuidv4(), type: 'todo', content: '🛠️ Implementar endpoints y validación de tipos en TypeScript/Go', checked: false },
-  { id: uuidv4(), type: 'todo', content: '🧪 Escribir tests unitarios y verificar cobertura', checked: false },
-  { id: uuidv4(), type: 'todo', content: '🚀 Optimizar índices de base de datos y tiempos de respuesta', checked: false },
-  { id: uuidv4(), type: 'heading3', content: '📝 Bitácora de Cambios & Comandos' },
-  { id: uuidv4(), type: 'code', content: '# Comandos del día\nnpx tsc --noEmit\nnpm run build', language: 'bash' },
-  { id: uuidv4(), type: 'heading3', content: '🏁 Cierre y Retrospectiva' },
-  { id: uuidv4(), type: 'paragraph', content: 'Resumen de qué funcionó bien hoy y qué bloqueos se resolvieron...' },
+  { id: uuidv4(), type: 'heading3', content: '⚡ Acciones Innegociables' },
+  { id: uuidv4(), type: 'todo', content: '[1] ', checked: false },
+  { id: uuidv4(), type: 'todo', content: '[2] ', checked: false },
+  { id: uuidv4(), type: 'todo', content: '[3] ', checked: false },
+  { id: uuidv4(), type: 'heading3', content: '📝 Notas Rápidas' },
+  { id: uuidv4(), type: 'paragraph', content: '' },
 ];
 
-const getWellnessCoupleTemplate = (): PageBlock[] => [
-  { id: uuidv4(), type: 'heading2', content: '🌿 BIENESTAR, HÁBITOS & CONEXIÓN EN PAREJA' },
+const getDeepWorkSprintSkeleton = (): PageBlock[] => [
+  { id: uuidv4(), type: 'heading2', content: '💻 SPRINT & ENFOQUE PROFUNDO (DEEP WORK)' },
   {
     id: uuidv4(),
     type: 'callout',
-    content: '💖 Intención: Desconectar del trabajo mental, reconectar con uno mismo y compartir tiempo de calidad.',
+    content: '🔥 Meta central del sprint de hoy: ',
     calloutType: 'info',
   },
-  { id: uuidv4(), type: 'heading3', content: '🧘 Hábitos de Cuidado Personal' },
-  { id: uuidv4(), type: 'todo', content: '💧 Beber al menos 2.5 litros de agua hoy', checked: false },
-  { id: uuidv4(), type: 'todo', content: '🥑 Alimentación balanceada y comida casera', checked: false },
-  { id: uuidv4(), type: 'todo', content: '🏃 Entrenamiento o sesión de yoga de 30 minutos', checked: false },
-  { id: uuidv4(), type: 'todo', content: '📚 20 minutos de lectura libre o meditación', checked: false },
-  { id: uuidv4(), type: 'heading3', content: '💑 Momentos en Pareja' },
-  { id: uuidv4(), type: 'todo', content: '☕ Conversación matutina con café sin celular', checked: false },
-  { id: uuidv4(), type: 'todo', content: '🎬 Plan relajante para la noche: cena rica o película', checked: false },
-  { id: uuidv4(), type: 'heading3', content: '✨ Gratitud del Día' },
-  { id: uuidv4(), type: 'paragraph', content: 'Escribe aquí los momentos o gestos especiales vividos hoy...' },
+  { id: uuidv4(), type: 'heading3', content: '🎯 Entregables Clave' },
+  { id: uuidv4(), type: 'todo', content: '🛠️ Tarea 1: ', checked: false },
+  { id: uuidv4(), type: 'todo', content: '🛠️ Tarea 2: ', checked: false },
+  { id: uuidv4(), type: 'todo', content: '🧪 Verificación & Pruebas: ', checked: false },
+  { id: uuidv4(), type: 'heading3', content: '📝 Bitácora Técnica / Comandos' },
+  { id: uuidv4(), type: 'code', content: '# Notas de comandos o configuración\n', language: 'bash' },
+  { id: uuidv4(), type: 'heading3', content: '🏁 Cierre & Retrospectiva' },
+  { id: uuidv4(), type: 'paragraph', content: '' },
+];
+
+const getWellnessHabitsSkeleton = (): PageBlock[] => [
+  { id: uuidv4(), type: 'heading2', content: '🌿 BIENESTAR & ENERGÍA' },
+  {
+    id: uuidv4(),
+    type: 'callout',
+    content: '💖 Intención de autocuidado: ',
+    calloutType: 'info',
+  },
+  { id: uuidv4(), type: 'heading3', content: '🧘 Hábitos Innegociables' },
+  { id: uuidv4(), type: 'todo', content: '💧 Hidratación consciente', checked: false },
+  { id: uuidv4(), type: 'todo', content: '🥗 Nutrición balanceada', checked: false },
+  { id: uuidv4(), type: 'todo', content: '🏃 Movimiento o ejercicio', checked: false },
+  { id: uuidv4(), type: 'todo', content: '📚 Lectura o desconexión de pantallas', checked: false },
+  { id: uuidv4(), type: 'heading3', content: '✨ Reflexión & Estado de Ánimo' },
+  { id: uuidv4(), type: 'paragraph', content: '' },
+];
+
+const getSharedCoupleSkeleton = (): PageBlock[] => [
+  { id: uuidv4(), type: 'heading2', content: '💑 PLANIFICACIÓN COMPARTIDA & HOGAR' },
+  {
+    id: uuidv4(),
+    type: 'callout',
+    content: '🤝 Meta o acuerdo conjunto del día: ',
+    calloutType: 'info',
+  },
+  { id: uuidv4(), type: 'heading3', content: '🛒 Pendientes del Hogar & Logística' },
+  { id: uuidv4(), type: 'todo', content: 'Gestionar o comprar: ', checked: false },
+  { id: uuidv4(), type: 'todo', content: 'Coordinar horario de: ', checked: false },
+  { id: uuidv4(), type: 'heading3', content: '✨ Tiempo Compartido' },
+  { id: uuidv4(), type: 'todo', content: 'Plan de tiempo de calidad: ', checked: false },
+  { id: uuidv4(), type: 'heading3', content: '💬 Notas & Acuerdos' },
+  { id: uuidv4(), type: 'paragraph', content: '' },
+];
+
+const getWeeklyReviewSkeleton = (): PageBlock[] => [
+  { id: uuidv4(), type: 'heading2', content: '📈 REVISIÓN SEMANAL & RETROSPECTIVA' },
+  {
+    id: uuidv4(),
+    type: 'callout',
+    content: '📊 Calificación de la semana (1-10) y sentimiento general: ',
+    calloutType: 'info',
+  },
+  { id: uuidv4(), type: 'heading3', content: '🏆 Mayores Victorias de la Semana' },
+  { id: uuidv4(), type: 'bullet_list', content: 'Victoria 1: ' },
+  { id: uuidv4(), type: 'bullet_list', content: 'Victoria 2: ' },
+  { id: uuidv4(), type: 'heading3', content: '🔍 Aprendizajes & Obstáculos' },
+  { id: uuidv4(), type: 'bullet_list', content: 'Qué no funcionó bien y cómo mejorarlo: ' },
+  { id: uuidv4(), type: 'heading3', content: '🚀 Enfoque para la Próxima Semana' },
+  { id: uuidv4(), type: 'todo', content: 'Meta clave 1: ', checked: false },
+  { id: uuidv4(), type: 'todo', content: 'Meta clave 2: ', checked: false },
+];
+
+const getCleanBlankSkeleton = (): PageBlock[] => [
+  { id: uuidv4(), type: 'heading2', content: '📝 Notas del Día' },
+  { id: uuidv4(), type: 'paragraph', content: '' },
 ];
 
 export default function DailyNoteView() {
@@ -315,25 +362,42 @@ export default function DailyNoteView() {
 
   // Find daily note for date reactively from store
   const note = useMemo(() => {
-    return dailyNotes.find(n => n.date === currentDateStr && n.owner === currentOwner);
-  }, [dailyNotes, currentDateStr, currentOwner]);
+    return dailyNotes.find(n => n.date === currentDateStr && (n.owner === currentOwner || n.owner === currentUser?.id));
+  }, [dailyNotes, currentDateStr, currentOwner, currentUser?.id]);
 
   useEffect(() => {
-    if (!note && currentOwner) {
+    const ownerId = currentOwner || currentUser?.id || 'user';
+    if (!note && (currentOwner || currentUser?.id)) {
       const newNote: DailyNote = {
-        id: `dn-${currentOwner}-${currentDateStr}`,
+        id: `dn-${ownerId}-${currentDateStr}`,
         date: currentDateStr,
-        owner: currentOwner,
-        content: getLifeOSTemplate(),
+        owner: ownerId,
+        content: getLifeOSSkeleton(),
         wikiLinks: [],
       };
       upsertDailyNote(newNote);
+    } else if (note?.content) {
+      // Auto-sanitize existing notes in browser storage that still contain legacy mock text
+      const hasLegacyMock = note.content.some(b =>
+        typeof b.content === 'string' && (
+          b.content.includes('Cami / David') ||
+          b.content.includes('microservicio') ||
+          b.content.includes('cena con Cami') ||
+          b.content.includes('cena con David')
+        )
+      );
+      if (hasLegacyMock) {
+        upsertDailyNote({
+          ...note,
+          content: getLifeOSSkeleton(),
+        });
+      }
     }
-  }, [currentDateStr, note, currentOwner, upsertDailyNote]);
+  }, [currentDateStr, note, currentOwner, currentUser?.id, upsertDailyNote]);
 
   const activeContent: PageBlock[] = useMemo(() => {
     if (note?.content && note.content.length > 0) return note.content;
-    return getLifeOSTemplate();
+    return getLifeOSSkeleton();
   }, [note?.content]);
 
   // Sync markdownText whenever note, activeContent, or editorMode changes
@@ -345,10 +409,11 @@ export default function DailyNoteView() {
 
   // Update whole note safely
   const updateNoteContent = (newBlocks: PageBlock[], additionalWikiLinks?: string[]) => {
+    const ownerId = currentOwner || currentUser?.id || 'user';
     const existing: DailyNote = note || {
-      id: `dn-${currentOwner}-${currentDateStr}`,
+      id: `dn-${ownerId}-${currentDateStr}`,
       date: currentDateStr,
-      owner: currentOwner || 'david',
+      owner: ownerId,
       content: newBlocks,
       wikiLinks: [],
     };
@@ -436,7 +501,9 @@ export default function DailyNoteView() {
     setSlashMenuBlockIndex(null);
   };
 
-  const handleApplyTemplate = (templateName: 'lifeos' | 'tech' | 'wellness' | 'clean') => {
+  type DailySkeletonType = 'lifeos' | 'minimal' | 'deepwork' | 'wellness' | 'couple' | 'weekly' | 'clean';
+
+  const handleApplyTemplate = (templateName: DailySkeletonType) => {
     if (
       activeContent.length > 3 &&
       !window.confirm('¿Deseas aplicar esta plantilla? Se reemplazará el contenido actual de la nota del día.')
@@ -445,14 +512,30 @@ export default function DailyNoteView() {
     }
 
     let newBlocks: PageBlock[] = [];
-    if (templateName === 'lifeos') newBlocks = getLifeOSTemplate();
-    else if (templateName === 'tech') newBlocks = getTechSprintTemplate();
-    else if (templateName === 'wellness') newBlocks = getWellnessCoupleTemplate();
-    else if (templateName === 'clean') {
-      newBlocks = [
-        { id: uuidv4(), type: 'heading2', content: '📝 Notas Rápidas' },
-        { id: uuidv4(), type: 'paragraph', content: '' },
-      ];
+    switch (templateName) {
+      case 'lifeos':
+        newBlocks = getLifeOSSkeleton();
+        break;
+      case 'minimal':
+        newBlocks = getMinimalistSkeleton();
+        break;
+      case 'deepwork':
+        newBlocks = getDeepWorkSprintSkeleton();
+        break;
+      case 'wellness':
+        newBlocks = getWellnessHabitsSkeleton();
+        break;
+      case 'couple':
+        newBlocks = getSharedCoupleSkeleton();
+        break;
+      case 'weekly':
+        newBlocks = getWeeklyReviewSkeleton();
+        break;
+      case 'clean':
+        newBlocks = getCleanBlankSkeleton();
+        break;
+      default:
+        newBlocks = getLifeOSSkeleton();
     }
 
     updateNoteContent(newBlocks);
@@ -800,27 +883,70 @@ export default function DailyNoteView() {
             type="button"
             onClick={() => handleApplyTemplate('lifeos')}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs font-medium text-nexus-text transition cursor-pointer"
+            title="Estructura integral para tu día: Enfoque, prioridades, agenda y victorias"
           >
             <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-            <span>🌟 Master LifeOS Completa</span>
+            <span>🌟 Master LifeOS</span>
           </button>
 
           <button
             type="button"
-            onClick={() => handleApplyTemplate('tech')}
+            onClick={() => handleApplyTemplate('minimal')}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs font-medium text-nexus-text transition cursor-pointer"
+            title="Un único resultado clave y 3 acciones innegociables"
+          >
+            <Target className="w-3.5 h-3.5 text-cyan-400" />
+            <span>🎯 Enfoque Esencial</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleApplyTemplate('deepwork')}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs font-medium text-nexus-text transition cursor-pointer"
+            title="Sprint técnico de alta concentración, entregables y comandos"
           >
             <Code className="w-3.5 h-3.5 text-amber-400" />
-            <span>💻 Sprint Tech & Arquitectura</span>
+            <span>💻 Deep Work & Sprint</span>
           </button>
 
           <button
             type="button"
             onClick={() => handleApplyTemplate('wellness')}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs font-medium text-nexus-text transition cursor-pointer"
+            title="Hábitos innegociables, autocuidado y salud física/mental"
           >
-            <Heart className="w-3.5 h-3.5 text-pink-400" />
-            <span>🌿 Bienestar & Pareja</span>
+            <Heart className="w-3.5 h-3.5 text-emerald-400" />
+            <span>🌿 Bienestar & Hábitos</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleApplyTemplate('couple')}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs font-medium text-nexus-text transition cursor-pointer"
+            title="Acuerdos conjuntos, tareas del hogar y tiempo de calidad"
+          >
+            <Share2 className="w-3.5 h-3.5 text-pink-400" />
+            <span>💑 Pareja & Hogar</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleApplyTemplate('weekly')}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs font-medium text-nexus-text transition cursor-pointer"
+            title="Calificación, mayores victorias, aprendizajes y foco para la siguiente semana"
+          >
+            <FolderKanban className="w-3.5 h-3.5 text-purple-400" />
+            <span>📈 Retrospectiva Semanal</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleApplyTemplate('clean')}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs font-medium text-nexus-text transition cursor-pointer"
+            title="Lienzo limpio sin bloques previos"
+          >
+            <FileText className="w-3.5 h-3.5 text-slate-400" />
+            <span>📝 Hoja en Blanco</span>
           </button>
 
           {/* Plantillas Personalizadas */}

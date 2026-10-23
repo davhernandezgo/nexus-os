@@ -244,7 +244,7 @@ const LoginScreen: React.FC = () => {
                     required
                     value={fullName}
                     onChange={e => setFullName(e.target.value)}
-                    placeholder="Ej. David Hernández"
+                    placeholder="Tu nombre completo"
                     className="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-nexus-surface-2 border border-nexus-border text-xs text-nexus-text placeholder-nexus-text-muted focus:outline-none focus:border-indigo-500"
                   />
                 </div>

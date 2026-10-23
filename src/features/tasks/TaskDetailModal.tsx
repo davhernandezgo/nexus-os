@@ -346,7 +346,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ taskId, onClose }) =>
   };
 
   const handleInsertTable = () => {
-    const tableTemplate = `\n| Item / Tópico | Responsable | Estado |\n| --- | --- | --- |\n| Paso 1 | David | En curso |\n| Paso 2 | Cami | Pendiente |\n`;
+    const tableTemplate = `\n| Item / Tópico | Responsable | Estado |\n| --- | --- | --- |\n| Paso 1 | Responsable 1 | En curso |\n| Paso 2 | Responsable 2 | Pendiente |\n`;
     handleMarkdownChange(markdownText + tableTemplate);
   };
 

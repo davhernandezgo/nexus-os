@@ -92,6 +92,7 @@ export default function EisenhowerView() {
     updateTask,
     addTask,
     currentOwner,
+    currentUser,
   } = useNexusStore();
 
   const visibleTasks = getVisibleTasks();
@@ -180,7 +181,7 @@ export default function EisenhowerView() {
       description: '',
       status: 'todo',
       priority,
-      owner: currentOwner || 'david',
+      owner: currentOwner || currentUser?.id || 'user',
       visibility: 'private',
       projectId: projectFilter !== 'all' && projectFilter !== 'none' ? projectFilter : undefined,
       subtaskIds: [],

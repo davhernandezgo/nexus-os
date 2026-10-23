@@ -195,7 +195,7 @@ const SLASH_COMMANDS: SlashCommandItem[] = [
     label: 'Tabla Markdown',
     desc: 'Cuadrícula con encabezados y filas',
     icon: TableIcon,
-    snippet: '| Entidad | Responsable | Estado |\n| :--- | :--- | :--- |\n| Frontend | David | En progreso |\n| Diseño | Cami | Completado |\n\n',
+    snippet: '| Entidad | Responsable | Estado |\n| :--- | :--- | :--- |\n| Frontend | Persona 1 | En progreso |\n| Diseño | Persona 2 | Completado |\n\n',
   },
 
   // ── NexusOS & Obsidian ──

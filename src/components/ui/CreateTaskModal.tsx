@@ -501,7 +501,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
                 </div>
                 <div>
                   <div className="text-xs font-bold text-pink-400">💑 En Pareja (Compartido)</div>
-                  <div className="text-[10px] text-nexus-text-muted">Visible para David y Cami</div>
+                  <div className="text-[10px] text-nexus-text-muted">Visible para ambos en el Hub de Pareja</div>
                 </div>
               </button>
             </div>

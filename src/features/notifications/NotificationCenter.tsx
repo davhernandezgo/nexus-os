@@ -30,6 +30,7 @@ export default function NotificationCenter() {
     setSelectedTaskId,
     setActiveView,
     currentOwner,
+    currentUser,
   } = useNexusStore();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -85,7 +86,7 @@ export default function NotificationCenter() {
       title: '🔔 Notificación de prueba NexusOS',
       body: 'El sistema de alertas y recordatorios está activo y sincronizado.',
       level: 'info',
-      owner: currentOwner || 'david',
+      owner: currentOwner || currentUser?.id || 'user',
       read: false,
       createdAt: new Date().toISOString(),
     };

@@ -35,7 +35,7 @@ const PRESETS = [
 ];
 
 export default function HabitCreateModal({ isOpen, onClose }: HabitCreateModalProps) {
-  const { addHabit, currentOwner } = useNexusStore();
+  const { addHabit, currentOwner, currentUser } = useNexusStore();
 
   const [name, setName] = useState('');
   const [icon, setIcon] = useState('💧');
@@ -72,7 +72,7 @@ export default function HabitCreateModal({ isOpen, onClose }: HabitCreateModalPr
       name: name.trim(),
       icon,
       color,
-      owner: currentOwner || 'david',
+      owner: currentOwner || currentUser?.id || 'user',
       visibility,
       frequencyPerWeek: Number(frequencyPerWeek) || 7,
       goalType,

@@ -71,8 +71,8 @@ export default function ExpenseTracker() {
 
   const currentAccount = accounts.find(a => a.owner === currentOwner || a.id === currentUser?.id);
   const currentDisplayName = currentUser?.displayName || currentAccount?.displayName || 'tu cuenta';
-  const partner1Name = coupleSpace?.user1Name || 'David';
-  const partner2Name = coupleSpace?.user2Name || 'Cami';
+  const partner1Name = coupleSpace?.user1Name || 'Usuario 1';
+  const partner2Name = coupleSpace?.user2Name || 'Usuario 2';
 
   const allExpenses = getVisibleExpenses();
   const balance = getBalance();
@@ -290,7 +290,7 @@ export default function ExpenseTracker() {
       category: budgetCat,
       monthlyLimit: cleanLimit,
       currency: 'COP',
-      owner: currentOwner || 'david',
+      owner: currentOwner || currentUser?.id || 'user',
       visibility: budgetScope,
     };
 
@@ -367,7 +367,7 @@ export default function ExpenseTracker() {
                 <ArrowRightLeft className="w-4 h-4 text-nexus-accent-pink" />
                 <span>Balance Compartido de Pareja</span>
                 <span className="px-2 py-0.5 rounded-md bg-pink-500/10 text-pink-400 text-[10px] font-mono border border-pink-500/20">
-                  {coupleSpace?.name || 'David & Cami'}
+                  {coupleSpace?.name || 'Espacio Compartido'}
                 </span>
               </div>
               <h2 className="text-2xl font-bold text-nexus-text mt-1">Presupuesto & Acuerdos de Split</h2>
@@ -458,16 +458,16 @@ export default function ExpenseTracker() {
                     <span className="text-emerald-400">¡Están al día! Todo el balance está en paz</span>
                   ) : balance.net > 0 ? (
                     <>
-                      <span className="text-pink-400 font-bold">Cami</span> le transfiere a{' '}
-                      <span className="text-indigo-400 font-bold">David</span>:{' '}
+                      <span className="text-pink-400 font-bold">{partner2Name}</span> le transfiere a{' '}
+                      <span className="text-indigo-400 font-bold">{partner1Name}</span>:{' '}
                       <span className="text-emerald-400 font-mono text-base font-bold ml-1">
                         {formatCOP(Math.abs(balance.net))}
                       </span>
                     </>
                   ) : (
                     <>
-                      <span className="text-indigo-400 font-bold">David</span> le transfiere a{' '}
-                      <span className="text-pink-400 font-bold">Cami</span>:{' '}
+                      <span className="text-indigo-400 font-bold">{partner1Name}</span> le transfiere a{' '}
+                      <span className="text-pink-400 font-bold">{partner2Name}</span>:{' '}
                       <span className="text-emerald-400 font-mono text-base font-bold ml-1">
                         {formatCOP(Math.abs(balance.net))}
                       </span>
@@ -953,7 +953,7 @@ export default function ExpenseTracker() {
                         <span className="flex items-center gap-1 font-medium">
                           <span>{isDavid ? '👨‍💻' : '👩‍🎨'}</span>
                           <span className={isDavid ? 'text-indigo-400' : 'text-pink-400'}>
-                            Pagado por {isDavid ? 'David' : 'Cami'}
+                            Pagado por {isDavid ? partner1Name : partner2Name}
                           </span>
                         </span>
                       </div>
@@ -1165,8 +1165,8 @@ export default function ExpenseTracker() {
                     {splitType === 'percentage' && (
                       <div className="space-y-2 pt-2">
                         <div className="flex justify-between text-xs font-medium">
-                          <span className="text-indigo-400">David: {splitDavidPct}%</span>
-                          <span className="text-pink-400">Cami: {100 - splitDavidPct}%</span>
+                          <span className="text-indigo-400">{partner1Name}: {splitDavidPct}%</span>
+                          <span className="text-pink-400">{partner2Name}: {100 - splitDavidPct}%</span>
                         </div>
                         <input
                           type="range"
@@ -1200,22 +1200,22 @@ export default function ExpenseTracker() {
                     {splitType === 'exact' && (
                       <div className="grid grid-cols-2 gap-2 pt-2">
                         <div>
-                          <label className="text-[10px] text-nexus-text-muted block mb-1">David asume (COP):</label>
+                          <label className="text-[10px] text-nexus-text-muted block mb-1">{partner1Name} asume (COP):</label>
                           <input
                             type="number"
                             value={splitExactDavid}
                             onChange={e => setSplitExactDavid(e.target.value)}
-                            placeholder="Monto David"
+                            placeholder={`Monto ${partner1Name}`}
                             className="w-full px-2.5 py-1.5 rounded-lg bg-nexus-surface-3 border border-nexus-border text-xs text-nexus-text font-mono"
                           />
                         </div>
                         <div>
-                          <label className="text-[10px] text-nexus-text-muted block mb-1">Cami asume (COP):</label>
+                          <label className="text-[10px] text-nexus-text-muted block mb-1">{partner2Name} asume (COP):</label>
                           <input
                             type="number"
                             value={splitExactCami}
                             onChange={e => setSplitExactCami(e.target.value)}
-                            placeholder="Monto Cami"
+                            placeholder={`Monto ${partner2Name}`}
                             className="w-full px-2.5 py-1.5 rounded-lg bg-nexus-surface-3 border border-nexus-border text-xs text-nexus-text font-mono"
                           />
                         </div>
