@@ -46,6 +46,7 @@ import type { Task, Priority, TaskStatus, Visibility, BlockType, PageBlock, Task
 import { getDeliveryStatus } from '../../types/nexus';
 import { BUILTIN_TEMPLATES } from '../../services/templates';
 import CreateTemplateModal from '../../components/ui/CreateTemplateModal';
+import TemplateGalleryModal from '../../components/ui/TemplateGalleryModal';
 import { v4 as uuidv4 } from 'uuid';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -231,6 +232,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ taskId, onClose }) =>
   const [editorMode, setEditorMode] = useState<'markdown' | 'blocks'>('markdown');
   const [markdownText, setMarkdownText] = useState('');
   const [showTemplatesMenu, setShowTemplatesMenu] = useState(false);
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<TemplateCategory>('all');
   const [createTemplateModalOpen, setCreateTemplateModalOpen] = useState(false);
   const [templateInitialMarkdown, setTemplateInitialMarkdown] = useState('');
@@ -362,8 +364,19 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ taskId, onClose }) =>
   }, [allTemplates, selectedCategory]);
 
   const handleApplyTemplate = (tmpl: TaskTemplate) => {
-    handleUpdate({ pageContent: tmpl.blocks });
-    setMarkdownText(tmpl.markdown || blocksToMarkdown(tmpl.blocks));
+    if (
+      task.pageContent &&
+      task.pageContent.length > 2 &&
+      !window.confirm('¿Deseas aplicar esta plantilla? Se reemplazará el contenido actual del documento.')
+    ) {
+      return;
+    }
+    const clonedBlocks = tmpl.blocks.map(b => ({
+      ...b,
+      id: `block-${uuidv4().slice(0, 8)}`,
+    }));
+    handleUpdate({ pageContent: clonedBlocks });
+    setMarkdownText(tmpl.markdown || blocksToMarkdown(clonedBlocks));
     setShowTemplatesMenu(false);
   };
 
@@ -924,160 +937,25 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ taskId, onClose }) =>
                 </div>
 
                 <div className="flex items-center gap-2 flex-wrap">
-                  {/* Templates Gallery Popover Button */}
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onClick={() => setShowTemplatesMenu(!showTemplatesMenu)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shadow-xs ${
-                        showTemplatesMenu
-                          ? 'bg-indigo-600 text-white shadow-indigo-500/25 ring-2 ring-indigo-500/40'
-                          : 'bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border border-indigo-500/30'
-                      }`}
-                    >
-                      <Wand2 className="w-3.5 h-3.5" />
-                      <span>✨ Plantillas ({allTemplates.length})</span>
-                    </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsGalleryOpen(true)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border border-indigo-500/30 transition-all shadow-xs cursor-pointer"
+                    title="Explorar el catálogo completo de plantillas y previsualizar su contenido"
+                  >
+                    <Wand2 className="w-3.5 h-3.5 text-indigo-400" />
+                    <span>Plantillas ({allTemplates.length})</span>
+                  </button>
 
-                    {/* Rich Templates Drawer / Modal Menu */}
-                    {showTemplatesMenu && (
-                      <div className="absolute right-0 mt-2 w-[340px] sm:w-[520px] bg-nexus-surface-2 border border-nexus-border rounded-2xl shadow-2xl p-3.5 z-40 space-y-3.5 max-h-[480px] flex flex-col">
-                        {/* Top Bar with Title and Creation Actions */}
-                        <div className="flex items-center justify-between pb-2 border-b border-nexus-border/80 shrink-0">
-                          <div>
-                            <h4 className="text-xs font-bold text-nexus-text flex items-center gap-1.5">
-                              <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-                              Galería de Plantillas ({allTemplates.length})
-                            </h4>
-                            <p className="text-[10px] text-nexus-text-muted">
-                              Aplica o crea estructuras reutilizables para tu página.
-                            </p>
-                          </div>
-
-                          <div className="flex items-center gap-1.5">
-                            <button
-                              type="button"
-                              onClick={handleOpenCreateBlankTemplate}
-                              className="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-semibold flex items-center gap-1 shadow-xs transition-colors"
-                              title="Crear plantilla desde cero"
-                            >
-                              <Plus className="w-3 h-3" />
-                              <span>Crear</span>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={handleOpenSaveAsTemplate}
-                              className="px-2.5 py-1 rounded-lg bg-nexus-surface-3 hover:bg-nexus-surface border border-nexus-border text-nexus-text-secondary hover:text-nexus-text text-[11px] font-semibold flex items-center gap-1 transition-colors"
-                              title="Guardar el contenido actual de esta hoja como plantilla"
-                            >
-                              <Save className="w-3 h-3 text-emerald-400" />
-                              <span>Guardar Hoja</span>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setShowTemplatesMenu(false)}
-                              className="p-1 rounded-lg text-nexus-text-muted hover:text-nexus-text hover:bg-nexus-surface-3"
-                            >
-                              <X className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Category Filter Pills */}
-                        <div className="flex items-center gap-1 overflow-x-auto pb-1 shrink-0 scrollbar-none">
-                          {TEMPLATE_CATEGORIES.map((cat) => (
-                            <button
-                              key={cat.id}
-                              type="button"
-                              onClick={() => setSelectedCategory(cat.id)}
-                              className={`px-2.5 py-1 rounded-lg text-[10px] font-semibold shrink-0 transition-colors flex items-center gap-1 ${
-                                selectedCategory === cat.id
-                                  ? 'bg-indigo-600 text-white'
-                                  : 'bg-nexus-surface-3 text-nexus-text-muted hover:text-nexus-text border border-nexus-border/50'
-                              }`}
-                            >
-                              <span>{cat.icon}</span>
-                              <span>{cat.label}</span>
-                              {cat.id === 'custom' && (customTemplates || []).length > 0 && (
-                                <span className="ml-0.5 px-1.5 py-0.2 rounded-full bg-indigo-500/30 text-white text-[9px]">
-                                  {customTemplates.length}
-                                </span>
-                              )}
-                            </button>
-                          ))}
-                        </div>
-
-                        {/* Templates Grid List */}
-                        <div className="overflow-y-auto flex-1 pr-1 space-y-2">
-                          {filteredTemplates.length === 0 ? (
-                            <div className="text-center py-6 text-nexus-text-muted text-xs space-y-2">
-                              <p>No hay plantillas en esta categoría.</p>
-                              {selectedCategory === 'custom' && (
-                                <button
-                                  type="button"
-                                  onClick={handleOpenCreateBlankTemplate}
-                                  className="px-3 py-1.5 rounded-xl bg-indigo-600 text-white text-xs font-semibold"
-                                >
-                                  Crear tu primera plantilla
-                                </button>
-                              )}
-                            </div>
-                          ) : (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                              {filteredTemplates.map((tmpl) => (
-                                <div
-                                  key={tmpl.id}
-                                  onClick={() => handleApplyTemplate(tmpl)}
-                                  className="group relative p-2.5 rounded-xl bg-nexus-surface/60 hover:bg-nexus-surface border border-nexus-border/70 hover:border-indigo-500/50 cursor-pointer transition-all flex flex-col justify-between"
-                                >
-                                  <div>
-                                    <div className="flex items-start justify-between gap-1 mb-1">
-                                      <div className="flex items-center gap-1.5">
-                                        <span className="text-base">{tmpl.icon}</span>
-                                        <span className="text-xs font-bold text-nexus-text group-hover:text-indigo-400 transition-colors line-clamp-1">
-                                          {tmpl.name}
-                                        </span>
-                                      </div>
-                                      {tmpl.isCustom && (
-                                        <div className="flex items-center gap-1 shrink-0">
-                                          <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-purple-500/20 text-purple-300 font-medium">
-                                            Mía
-                                          </span>
-                                          <button
-                                            type="button"
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              if (confirm(`¿Eliminar plantilla "${tmpl.name}"?`)) {
-                                                deleteCustomTemplate(tmpl.id);
-                                              }
-                                            }}
-                                            className="p-1 rounded text-nexus-text-muted hover:text-red-400 hover:bg-red-500/10 transition-colors"
-                                            title="Eliminar plantilla"
-                                          >
-                                            <Trash2 className="w-3 h-3" />
-                                          </button>
-                                        </div>
-                                      )}
-                                    </div>
-                                    <p className="text-[10px] text-nexus-text-muted line-clamp-2 leading-relaxed">
-                                      {tmpl.description}
-                                    </p>
-                                  </div>
-
-                                  <div className="mt-2 pt-1.5 border-t border-nexus-border/40 flex items-center justify-between text-[10px] text-nexus-text-muted">
-                                    <span>{tmpl.blocks.length} bloques</span>
-                                    <span className="text-indigo-400 font-medium group-hover:underline">
-                                      Aplicar →
-                                    </span>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                  <button
+                    type="button"
+                    onClick={handleOpenSaveAsTemplate}
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs text-nexus-text-muted hover:text-nexus-text transition cursor-pointer"
+                    title="Guardar el contenido actual como plantilla reutilizable"
+                  >
+                    <Save className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="hidden sm:inline">Guardar como plantilla</span>
+                  </button>
 
                   {/* Mode Switcher: Bloques vs Markdown */}
                   <div className="flex items-center gap-1 bg-nexus-surface-2 p-1 rounded-xl border border-nexus-border text-xs">
@@ -1423,6 +1301,15 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ taskId, onClose }) =>
           onSaveSuccess={(newTmpl) => {
             handleApplyTemplate(newTmpl);
           }}
+        />
+
+        {/* Template Gallery with Live Preview */}
+        <TemplateGalleryModal
+          isOpen={isGalleryOpen}
+          onClose={() => setIsGalleryOpen(false)}
+          onSelectTemplate={(tmpl) => handleApplyTemplate(tmpl)}
+          title="Galería & Vista Previa de Plantillas"
+          confirmButtonText="Aplicar a este documento"
         />
       </motion.div>,
       document.body

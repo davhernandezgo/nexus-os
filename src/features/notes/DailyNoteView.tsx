@@ -44,6 +44,8 @@ import {
   Target,
   FolderKanban,
   X,
+  Eye,
+  DollarSign,
 } from 'lucide-react';
 import { useNexusStore } from '../../store/nexusStore';
 import type { DailyNote, PageBlock, BlockType, Owner, TaskTemplate, Task } from '../../types/nexus';
@@ -52,6 +54,7 @@ import { format, parseISO, addDays, subDays, isToday } from 'date-fns';
 import { es } from 'date-fns/locale';
 import MarkdownStudio from '../../components/ui/MarkdownStudio';
 import CreateTemplateModal from '../../components/ui/CreateTemplateModal';
+import TemplateGalleryModal from '../../components/ui/TemplateGalleryModal';
 
 const SLASH_COMMANDS: { type: BlockType; label: string; icon: any; desc: string }[] = [
   { type: 'paragraph', label: 'Texto', icon: AlignLeft, desc: 'Párrafo de texto simple' },
@@ -314,6 +317,18 @@ const getWeeklyReviewSkeleton = (): PageBlock[] => [
   { id: uuidv4(), type: 'todo', content: 'Objetivo 2: ', checked: false },
 ];
 
+const getDailyFinanceSkeleton = (): PageBlock[] => [
+  { id: uuidv4(), type: 'heading2', content: 'Control de Finanzas del Día' },
+  { id: uuidv4(), type: 'callout', content: 'Límite o presupuesto estimado para hoy: ', calloutType: 'info' },
+  { id: uuidv4(), type: 'heading3', content: 'Gastos planificados' },
+  { id: uuidv4(), type: 'todo', content: 'Mercado / Alimentos: ', checked: false },
+  { id: uuidv4(), type: 'todo', content: 'Transporte o servicios: ', checked: false },
+  { id: uuidv4(), type: 'todo', content: 'Gastos imprevistos: ', checked: false },
+  { id: uuidv4(), type: 'heading3', content: 'Balance y ahorro' },
+  { id: uuidv4(), type: 'bullet_list', content: 'Total ejecutado en el día: ' },
+  { id: uuidv4(), type: 'bullet_list', content: 'Aporte al fondo o ahorro: ' },
+];
+
 const getCleanBlankSkeleton = (): PageBlock[] => [
   { id: uuidv4(), type: 'heading2', content: 'Notas del día' },
   { id: uuidv4(), type: 'paragraph', content: '' },
@@ -360,6 +375,8 @@ export default function DailyNoteView() {
   const [templateInitialMarkdown, setTemplateInitialMarkdown] = useState('');
   const [isTaskPickerOpen, setIsTaskPickerOpen] = useState(false);
   const [taskSearchQuery, setTaskSearchQuery] = useState('');
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+  const [previewTemplateId, setPreviewTemplateId] = useState<string | undefined>(undefined);
 
   // Find daily note for date reactively from store
   const note = useMemo(() => {
@@ -417,7 +434,7 @@ export default function DailyNoteView() {
     });
   };
 
-  type DailySkeletonType = 'lifeos' | 'minimal' | 'deepwork' | 'wellness' | 'couple' | 'weekly' | 'clean';
+  type DailySkeletonType = 'lifeos' | 'minimal' | 'deepwork' | 'wellness' | 'couple' | 'weekly' | 'finance' | 'clean';
 
   const handleCreateDailyNote = (templateKey: DailySkeletonType = 'lifeos') => {
     const ownerId = currentOwner || currentUser?.id || 'user';
@@ -429,6 +446,7 @@ export default function DailyNoteView() {
       case 'wellness': skeleton = getWellnessHabitsSkeleton(); break;
       case 'couple': skeleton = getSharedCoupleSkeleton(); break;
       case 'weekly': skeleton = getWeeklyReviewSkeleton(); break;
+      case 'finance': skeleton = getDailyFinanceSkeleton(); break;
       case 'clean': skeleton = getCleanBlankSkeleton(); break;
       default: skeleton = getLifeOSSkeleton();
     }
@@ -441,6 +459,45 @@ export default function DailyNoteView() {
     };
     upsertDailyNote(newNote);
     setMarkdownText(blocksToMarkdown(skeleton));
+  };
+
+  const handleOpenGallery = (templateId?: string) => {
+    setPreviewTemplateId(templateId);
+    setIsGalleryOpen(true);
+  };
+
+  const handleSelectTemplateFromGallery = (template: TaskTemplate) => {
+    if (
+      note &&
+      activeContent.length > 3 &&
+      !window.confirm('¿Deseas aplicar esta plantilla? Se reemplazará el contenido actual de la nota.')
+    ) {
+      return;
+    }
+
+    const clonedBlocks: PageBlock[] = (template.blocks || []).map(b => ({
+      ...b,
+      id: `block-${uuidv4().slice(0, 8)}`,
+      checked: b.type === 'todo' ? false : b.checked,
+    }));
+
+    const finalBlocks = clonedBlocks.length > 0 ? clonedBlocks : getCleanBlankSkeleton();
+
+    if (!note) {
+      const ownerId = currentOwner || currentUser?.id || 'user';
+      const newNote: DailyNote = {
+        id: `dn-${ownerId}-${currentDateStr}`,
+        date: currentDateStr,
+        owner: ownerId,
+        content: finalBlocks,
+        wikiLinks: [],
+      };
+      upsertDailyNote(newNote);
+      setMarkdownText(blocksToMarkdown(finalBlocks));
+    } else {
+      updateNoteContent(finalBlocks);
+      setMarkdownText(blocksToMarkdown(finalBlocks));
+    }
   };
 
   const handleDeleteDailyNote = () => {
@@ -552,6 +609,9 @@ export default function DailyNoteView() {
         break;
       case 'weekly':
         newBlocks = getWeeklyReviewSkeleton();
+        break;
+      case 'finance':
+        newBlocks = getDailyFinanceSkeleton();
         break;
       case 'clean':
         newBlocks = getCleanBlankSkeleton();
@@ -889,6 +949,15 @@ export default function DailyNoteView() {
 
             <button
               type="button"
+              onClick={() => handleOpenGallery()}
+              className="w-full sm:w-auto px-4 py-2.5 rounded-2xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-indigo-500/40 text-indigo-400 text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+            >
+              <Eye className="w-4 h-4" />
+              <span>Explorar y previsualizar plantillas</span>
+            </button>
+
+            <button
+              type="button"
               onClick={() => handleCreateDailyNote('clean')}
               className="w-full sm:w-auto px-4 py-2.5 rounded-2xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-nexus-text text-xs font-semibold transition flex items-center justify-center gap-2 cursor-pointer"
             >
@@ -898,9 +967,20 @@ export default function DailyNoteView() {
           </div>
 
           <div className="pt-4 border-t border-nexus-border/60">
-            <p className="text-[11px] font-semibold text-nexus-text-muted uppercase tracking-wider mb-3">
-              Plantillas:
-            </p>
+            <div className="flex items-center justify-between pb-3 max-w-xl mx-auto">
+              <span className="text-[11px] font-semibold text-nexus-text-muted uppercase tracking-wider">
+                Plantillas sugeridas:
+              </span>
+              <button
+                type="button"
+                onClick={() => handleOpenGallery()}
+                className="text-[11px] font-semibold text-indigo-400 hover:underline flex items-center gap-1 cursor-pointer"
+              >
+                <span>Ver todas y previsualizar</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
             <div className="flex flex-wrap items-center justify-center gap-2">
               <button
                 type="button"
@@ -928,6 +1008,14 @@ export default function DailyNoteView() {
               </button>
               <button
                 type="button"
+                onClick={() => handleCreateDailyNote('finance')}
+                className="px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs text-nexus-text flex items-center gap-1.5 transition cursor-pointer"
+              >
+                <DollarSign className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Finanzas</span>
+              </button>
+              <button
+                type="button"
                 onClick={() => handleCreateDailyNote('couple')}
                 className="px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs text-nexus-text flex items-center gap-1.5 transition cursor-pointer"
               >
@@ -950,11 +1038,20 @@ export default function DailyNoteView() {
           {/* ─── Templates Bar & Progress Stats ─────────────────────── */}
       <div className="p-4 rounded-2xl bg-nexus-surface border border-nexus-border shadow-lg space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <Wand2 className="w-4 h-4 text-indigo-400" />
             <span className="text-xs font-bold uppercase tracking-wider text-nexus-text">
               Plantillas
             </span>
+            <button
+              type="button"
+              onClick={() => handleOpenGallery()}
+              className="ml-1 sm:ml-2 flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border border-indigo-500/30 text-xs font-semibold transition cursor-pointer shadow-xs"
+              title="Explorar el catálogo completo de plantillas y previsualizar su contenido"
+            >
+              <Eye className="w-3.5 h-3.5" />
+              <span>Explorar y previsualizar</span>
+            </button>
           </div>
 
           {/* Mode Switcher: Blocks vs Markdown */}
@@ -1040,6 +1137,16 @@ export default function DailyNoteView() {
 
           <button
             type="button"
+            onClick={() => handleApplyTemplate('finance')}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs font-medium text-nexus-text transition cursor-pointer"
+            title="Presupuesto diario, gastos del día y balance"
+          >
+            <DollarSign className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Finanzas</span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => handleApplyTemplate('couple')}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs font-medium text-nexus-text transition cursor-pointer"
             title="Acuerdos, logística y actividades compartidas"
@@ -1066,6 +1173,16 @@ export default function DailyNoteView() {
           >
             <FileText className="w-3.5 h-3.5 text-slate-400" />
             <span>En blanco</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleOpenGallery()}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-xs font-bold text-indigo-400 transition cursor-pointer"
+            title="Ver catálogo completo de plantillas y previsualizar"
+          >
+            <Eye className="w-3.5 h-3.5" />
+            <span>Más plantillas...</span>
           </button>
 
           {/* Plantillas Personalizadas */}
@@ -1762,6 +1879,16 @@ export default function DailyNoteView() {
         onSaveSuccess={() => {
           setIsCreateTemplateOpen(false);
         }}
+      />
+
+      {/* ─── Modal de Explorar y Previsualizar Plantillas ─── */}
+      <TemplateGalleryModal
+        isOpen={isGalleryOpen}
+        onClose={() => setIsGalleryOpen(false)}
+        onSelectTemplate={handleSelectTemplateFromGallery}
+        initialTemplateId={previewTemplateId}
+        title="Explorador & Vista Previa de Plantillas"
+        confirmButtonText={note ? 'Aplicar a esta nota' : 'Crear nota con esta plantilla'}
       />
     </div>
   );
