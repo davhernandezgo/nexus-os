@@ -32,29 +32,21 @@ import {
   Quote,
   Clock,
   RotateCcw,
-  Flame,
-  Heart,
-  Wand2,
   Play,
   Check,
   Search,
   Link2,
   Unlink,
-  Save,
   Target,
   FolderKanban,
   X,
-  Eye,
-  DollarSign,
 } from 'lucide-react';
 import { useNexusStore } from '../../store/nexusStore';
-import type { DailyNote, PageBlock, BlockType, Owner, TaskTemplate, Task } from '../../types/nexus';
+import type { DailyNote, PageBlock, BlockType, Owner, Task } from '../../types/nexus';
 import { v4 as uuidv4 } from 'uuid';
 import { format, parseISO, addDays, subDays, isToday } from 'date-fns';
 import { es } from 'date-fns/locale';
 import MarkdownStudio from '../../components/ui/MarkdownStudio';
-import CreateTemplateModal from '../../components/ui/CreateTemplateModal';
-import TemplateGalleryModal from '../../components/ui/TemplateGalleryModal';
 
 const SLASH_COMMANDS: { type: BlockType; label: string; icon: any; desc: string }[] = [
   { type: 'paragraph', label: 'Texto', icon: AlignLeft, desc: 'Párrafo de texto simple' },
@@ -202,8 +194,8 @@ const markdownToBlocks = (md: string): PageBlock[] => {
   return blocks;
 };
 
-// ─── Clean Skeletons & Frameworks (Pure structure, zero dummy text) ──
-const getLifeOSSkeleton = (): PageBlock[] => [
+// ─── Plantilla Oficial de Nota del Día & En blanco ───────────────────
+const getDailyNoteSkeleton = (): PageBlock[] => [
   { id: uuidv4(), type: 'heading2', content: '1. Enfoque e intención' },
   {
     id: uuidv4(),
@@ -231,104 +223,6 @@ const getLifeOSSkeleton = (): PageBlock[] => [
   },
 ];
 
-const getMinimalistSkeleton = (): PageBlock[] => [
-  { id: uuidv4(), type: 'heading2', content: 'Enfoque esencial' },
-  {
-    id: uuidv4(),
-    type: 'callout',
-    content: 'Objetivo principal: ',
-    calloutType: 'info',
-  },
-  { id: uuidv4(), type: 'heading3', content: 'Acciones clave' },
-  { id: uuidv4(), type: 'todo', content: '1. ', checked: false },
-  { id: uuidv4(), type: 'todo', content: '2. ', checked: false },
-  { id: uuidv4(), type: 'todo', content: '3. ', checked: false },
-  { id: uuidv4(), type: 'heading3', content: 'Notas' },
-  { id: uuidv4(), type: 'paragraph', content: '' },
-];
-
-const getDeepWorkSprintSkeleton = (): PageBlock[] => [
-  { id: uuidv4(), type: 'heading2', content: 'Deep Work & Sprint' },
-  {
-    id: uuidv4(),
-    type: 'callout',
-    content: 'Meta del sprint: ',
-    calloutType: 'info',
-  },
-  { id: uuidv4(), type: 'heading3', content: 'Entregables' },
-  { id: uuidv4(), type: 'todo', content: 'Entregable 1: ', checked: false },
-  { id: uuidv4(), type: 'todo', content: 'Entregable 2: ', checked: false },
-  { id: uuidv4(), type: 'todo', content: 'Verificación: ', checked: false },
-  { id: uuidv4(), type: 'heading3', content: 'Bitácora técnica' },
-  { id: uuidv4(), type: 'code', content: '# Comandos o notas técnicas\n', language: 'bash' },
-  { id: uuidv4(), type: 'heading3', content: 'Cierre' },
-  { id: uuidv4(), type: 'paragraph', content: '' },
-];
-
-const getWellnessHabitsSkeleton = (): PageBlock[] => [
-  { id: uuidv4(), type: 'heading2', content: 'Bienestar y hábitos' },
-  {
-    id: uuidv4(),
-    type: 'callout',
-    content: 'Objetivo de bienestar: ',
-    calloutType: 'info',
-  },
-  { id: uuidv4(), type: 'heading3', content: 'Hábitos del día' },
-  { id: uuidv4(), type: 'todo', content: 'Hidratación', checked: false },
-  { id: uuidv4(), type: 'todo', content: 'Nutrición', checked: false },
-  { id: uuidv4(), type: 'todo', content: 'Actividad física', checked: false },
-  { id: uuidv4(), type: 'todo', content: 'Lectura o descanso', checked: false },
-  { id: uuidv4(), type: 'heading3', content: 'Reflexión' },
-  { id: uuidv4(), type: 'paragraph', content: '' },
-];
-
-const getSharedCoupleSkeleton = (): PageBlock[] => [
-  { id: uuidv4(), type: 'heading2', content: 'Planificación compartida' },
-  {
-    id: uuidv4(),
-    type: 'callout',
-    content: 'Objetivo conjunto: ',
-    calloutType: 'info',
-  },
-  { id: uuidv4(), type: 'heading3', content: 'Pendientes y logística' },
-  { id: uuidv4(), type: 'todo', content: 'Gestionar: ', checked: false },
-  { id: uuidv4(), type: 'todo', content: 'Coordinar: ', checked: false },
-  { id: uuidv4(), type: 'heading3', content: 'Tiempo compartido' },
-  { id: uuidv4(), type: 'todo', content: 'Actividad: ', checked: false },
-  { id: uuidv4(), type: 'heading3', content: 'Notas y acuerdos' },
-  { id: uuidv4(), type: 'paragraph', content: '' },
-];
-
-const getWeeklyReviewSkeleton = (): PageBlock[] => [
-  { id: uuidv4(), type: 'heading2', content: 'Revisión semanal' },
-  {
-    id: uuidv4(),
-    type: 'callout',
-    content: 'Evaluación y balance general: ',
-    calloutType: 'info',
-  },
-  { id: uuidv4(), type: 'heading3', content: 'Principales logros' },
-  { id: uuidv4(), type: 'bullet_list', content: 'Logro 1: ' },
-  { id: uuidv4(), type: 'bullet_list', content: 'Logro 2: ' },
-  { id: uuidv4(), type: 'heading3', content: 'Puntos de mejora' },
-  { id: uuidv4(), type: 'bullet_list', content: 'Aspecto a mejorar: ' },
-  { id: uuidv4(), type: 'heading3', content: 'Enfoque para la próxima semana' },
-  { id: uuidv4(), type: 'todo', content: 'Objetivo 1: ', checked: false },
-  { id: uuidv4(), type: 'todo', content: 'Objetivo 2: ', checked: false },
-];
-
-const getDailyFinanceSkeleton = (): PageBlock[] => [
-  { id: uuidv4(), type: 'heading2', content: 'Control de Finanzas del Día' },
-  { id: uuidv4(), type: 'callout', content: 'Límite o presupuesto estimado para hoy: ', calloutType: 'info' },
-  { id: uuidv4(), type: 'heading3', content: 'Gastos planificados' },
-  { id: uuidv4(), type: 'todo', content: 'Mercado / Alimentos: ', checked: false },
-  { id: uuidv4(), type: 'todo', content: 'Transporte o servicios: ', checked: false },
-  { id: uuidv4(), type: 'todo', content: 'Gastos imprevistos: ', checked: false },
-  { id: uuidv4(), type: 'heading3', content: 'Balance y ahorro' },
-  { id: uuidv4(), type: 'bullet_list', content: 'Total ejecutado en el día: ' },
-  { id: uuidv4(), type: 'bullet_list', content: 'Aporte al fondo o ahorro: ' },
-];
-
 const getCleanBlankSkeleton = (): PageBlock[] => [
   { id: uuidv4(), type: 'heading2', content: 'Notas del día' },
   { id: uuidv4(), type: 'paragraph', content: '' },
@@ -349,8 +243,6 @@ export default function DailyNoteView() {
     updateTask,
     toggleTaskStatus,
     startTimer,
-    customTemplates,
-    deleteCustomTemplate,
   } = useNexusStore();
 
   const currentAccount = accounts.find(a => a.owner === currentOwner || a.id === currentUser?.id);
@@ -370,13 +262,9 @@ export default function DailyNoteView() {
   const [wikiLinkPromptIndex, setWikiLinkPromptIndex] = useState<number | null>(null);
   const [wikiLinkQuery, setWikiLinkQuery] = useState('');
 
-  // Custom template modal & Task linking states
-  const [isCreateTemplateOpen, setIsCreateTemplateOpen] = useState(false);
-  const [templateInitialMarkdown, setTemplateInitialMarkdown] = useState('');
+  // Task linking state
   const [isTaskPickerOpen, setIsTaskPickerOpen] = useState(false);
   const [taskSearchQuery, setTaskSearchQuery] = useState('');
-  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
-  const [previewTemplateId, setPreviewTemplateId] = useState<string | undefined>(undefined);
 
   // Find daily note for date reactively from store
   const note = useMemo(() => {
@@ -397,7 +285,7 @@ export default function DailyNoteView() {
       if (hasLegacyMock) {
         upsertDailyNote({
           ...note,
-          content: getLifeOSSkeleton(),
+          content: getDailyNoteSkeleton(),
         });
       }
     }
@@ -434,22 +322,9 @@ export default function DailyNoteView() {
     });
   };
 
-  type DailySkeletonType = 'lifeos' | 'minimal' | 'deepwork' | 'wellness' | 'couple' | 'weekly' | 'finance' | 'clean';
-
-  const handleCreateDailyNote = (templateKey: DailySkeletonType = 'lifeos') => {
+  const handleCreateDailyNote = (isBlank: boolean = false) => {
     const ownerId = currentOwner || currentUser?.id || 'user';
-    let skeleton: PageBlock[] = [];
-    switch (templateKey) {
-      case 'lifeos': skeleton = getLifeOSSkeleton(); break;
-      case 'minimal': skeleton = getMinimalistSkeleton(); break;
-      case 'deepwork': skeleton = getDeepWorkSprintSkeleton(); break;
-      case 'wellness': skeleton = getWellnessHabitsSkeleton(); break;
-      case 'couple': skeleton = getSharedCoupleSkeleton(); break;
-      case 'weekly': skeleton = getWeeklyReviewSkeleton(); break;
-      case 'finance': skeleton = getDailyFinanceSkeleton(); break;
-      case 'clean': skeleton = getCleanBlankSkeleton(); break;
-      default: skeleton = getLifeOSSkeleton();
-    }
+    const skeleton = isBlank ? getCleanBlankSkeleton() : getDailyNoteSkeleton();
     const newNote: DailyNote = {
       id: `dn-${ownerId}-${currentDateStr}`,
       date: currentDateStr,
@@ -461,43 +336,28 @@ export default function DailyNoteView() {
     setMarkdownText(blocksToMarkdown(skeleton));
   };
 
-  const handleOpenGallery = (templateId?: string) => {
-    setPreviewTemplateId(templateId);
-    setIsGalleryOpen(true);
-  };
-
-  const handleSelectTemplateFromGallery = (template: TaskTemplate) => {
+  const handleResetToDailyTemplate = () => {
     if (
-      note &&
-      activeContent.length > 3 &&
-      !window.confirm('¿Deseas aplicar esta plantilla? Se reemplazará el contenido actual de la nota.')
+      activeContent.length > 1 &&
+      !window.confirm('¿Deseas restablecer la plantilla diaria? Se reemplazará el contenido actual de la nota.')
     ) {
       return;
     }
+    const skeleton = getDailyNoteSkeleton();
+    updateNoteContent(skeleton);
+    setMarkdownText(blocksToMarkdown(skeleton));
+  };
 
-    const clonedBlocks: PageBlock[] = (template.blocks || []).map(b => ({
-      ...b,
-      id: `block-${uuidv4().slice(0, 8)}`,
-      checked: b.type === 'todo' ? false : b.checked,
-    }));
-
-    const finalBlocks = clonedBlocks.length > 0 ? clonedBlocks : getCleanBlankSkeleton();
-
-    if (!note) {
-      const ownerId = currentOwner || currentUser?.id || 'user';
-      const newNote: DailyNote = {
-        id: `dn-${ownerId}-${currentDateStr}`,
-        date: currentDateStr,
-        owner: ownerId,
-        content: finalBlocks,
-        wikiLinks: [],
-      };
-      upsertDailyNote(newNote);
-      setMarkdownText(blocksToMarkdown(finalBlocks));
-    } else {
-      updateNoteContent(finalBlocks);
-      setMarkdownText(blocksToMarkdown(finalBlocks));
+  const handleClearToBlank = () => {
+    if (
+      activeContent.length > 1 &&
+      !window.confirm('¿Deseas vaciar la nota y dejarla en blanco?')
+    ) {
+      return;
     }
+    const blank = getCleanBlankSkeleton();
+    updateNoteContent(blank);
+    setMarkdownText(blocksToMarkdown(blank));
   };
 
   const handleDeleteDailyNote = () => {
@@ -582,71 +442,7 @@ export default function DailyNoteView() {
     setSlashMenuBlockIndex(null);
   };
 
-  const handleApplyTemplate = (templateName: DailySkeletonType) => {
-    if (
-      activeContent.length > 3 &&
-      !window.confirm('¿Deseas aplicar esta plantilla? Se reemplazará el contenido actual de la nota del día.')
-    ) {
-      return;
-    }
 
-    let newBlocks: PageBlock[] = [];
-    switch (templateName) {
-      case 'lifeos':
-        newBlocks = getLifeOSSkeleton();
-        break;
-      case 'minimal':
-        newBlocks = getMinimalistSkeleton();
-        break;
-      case 'deepwork':
-        newBlocks = getDeepWorkSprintSkeleton();
-        break;
-      case 'wellness':
-        newBlocks = getWellnessHabitsSkeleton();
-        break;
-      case 'couple':
-        newBlocks = getSharedCoupleSkeleton();
-        break;
-      case 'weekly':
-        newBlocks = getWeeklyReviewSkeleton();
-        break;
-      case 'finance':
-        newBlocks = getDailyFinanceSkeleton();
-        break;
-      case 'clean':
-        newBlocks = getCleanBlankSkeleton();
-        break;
-      default:
-        newBlocks = getLifeOSSkeleton();
-    }
-
-    updateNoteContent(newBlocks);
-    setMarkdownText(blocksToMarkdown(newBlocks));
-  };
-
-  const handleApplyCustomTemplate = (template: TaskTemplate) => {
-    if (
-      activeContent.length > 3 &&
-      !window.confirm(`¿Deseas aplicar la plantilla "${template.name}"? Se reemplazará el contenido actual de la nota del día.`)
-    ) {
-      return;
-    }
-
-    let newBlocks: PageBlock[] = [];
-    if (template.blocks && template.blocks.length > 0) {
-      newBlocks = template.blocks.map(b => ({ ...b, id: uuidv4() }));
-    } else if (template.markdown) {
-      newBlocks = markdownToBlocks(template.markdown);
-    } else {
-      newBlocks = [
-        { id: uuidv4(), type: 'heading2', content: `${template.icon || '📝'} ${template.name}` },
-        { id: uuidv4(), type: 'paragraph', content: template.description || '' },
-      ];
-    }
-
-    updateNoteContent(newBlocks);
-    setMarkdownText(blocksToMarkdown(newBlocks));
-  };
 
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -940,319 +736,95 @@ export default function DailyNoteView() {
           <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
             <button
               type="button"
-              onClick={() => handleCreateDailyNote('lifeos')}
+              onClick={() => handleCreateDailyNote(false)}
               className="w-full sm:w-auto px-5 py-2.5 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:opacity-95 text-white text-xs font-bold transition shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2 cursor-pointer"
             >
               <Plus className="w-4 h-4" />
-              <span>Crear nota diaria</span>
+              <span>Crear nota del día</span>
             </button>
 
             <button
               type="button"
-              onClick={() => handleOpenGallery()}
-              className="w-full sm:w-auto px-4 py-2.5 rounded-2xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-indigo-500/40 text-indigo-400 text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-xs"
-            >
-              <Eye className="w-4 h-4" />
-              <span>Explorar y previsualizar plantillas</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleCreateDailyNote('clean')}
+              onClick={() => handleCreateDailyNote(true)}
               className="w-full sm:w-auto px-4 py-2.5 rounded-2xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-nexus-text text-xs font-semibold transition flex items-center justify-center gap-2 cursor-pointer"
             >
               <FileText className="w-4 h-4 text-slate-400" />
               <span>Nota en blanco</span>
             </button>
           </div>
-
-          <div className="pt-4 border-t border-nexus-border/60">
-            <div className="flex items-center justify-between pb-3 max-w-xl mx-auto">
-              <span className="text-[11px] font-semibold text-nexus-text-muted uppercase tracking-wider">
-                Plantillas sugeridas:
-              </span>
-              <button
-                type="button"
-                onClick={() => handleOpenGallery()}
-                className="text-[11px] font-semibold text-indigo-400 hover:underline flex items-center gap-1 cursor-pointer"
-              >
-                <span>Ver todas y previsualizar</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              <button
-                type="button"
-                onClick={() => handleCreateDailyNote('minimal')}
-                className="px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs text-nexus-text flex items-center gap-1.5 transition cursor-pointer"
-              >
-                <Target className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Esencial</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleCreateDailyNote('deepwork')}
-                className="px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs text-nexus-text flex items-center gap-1.5 transition cursor-pointer"
-              >
-                <Code className="w-3.5 h-3.5 text-amber-400" />
-                <span>Deep Work</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleCreateDailyNote('wellness')}
-                className="px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs text-nexus-text flex items-center gap-1.5 transition cursor-pointer"
-              >
-                <Heart className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Bienestar</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleCreateDailyNote('finance')}
-                className="px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs text-nexus-text flex items-center gap-1.5 transition cursor-pointer"
-              >
-                <DollarSign className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Finanzas</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleCreateDailyNote('couple')}
-                className="px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs text-nexus-text flex items-center gap-1.5 transition cursor-pointer"
-              >
-                <Share2 className="w-3.5 h-3.5 text-pink-400" />
-                <span>Compartida</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleCreateDailyNote('weekly')}
-                className="px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs text-nexus-text flex items-center gap-1.5 transition cursor-pointer"
-              >
-                <FolderKanban className="w-3.5 h-3.5 text-purple-400" />
-                <span>Semanal</span>
-              </button>
-            </div>
-          </div>
         </div>
       ) : (
         <>
-          {/* ─── Templates Bar & Progress Stats ─────────────────────── */}
-      <div className="p-4 rounded-2xl bg-nexus-surface border border-nexus-border shadow-lg space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-2 flex-wrap">
-            <Wand2 className="w-4 h-4 text-indigo-400" />
-            <span className="text-xs font-bold uppercase tracking-wider text-nexus-text">
-              Plantillas
-            </span>
-            <button
-              type="button"
-              onClick={() => handleOpenGallery()}
-              className="ml-1 sm:ml-2 flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border border-indigo-500/30 text-xs font-semibold transition cursor-pointer shadow-xs"
-              title="Explorar el catálogo completo de plantillas y previsualizar su contenido"
-            >
-              <Eye className="w-3.5 h-3.5" />
-              <span>Explorar y previsualizar</span>
-            </button>
-          </div>
+          {/* ─── Control Bar: Modo de edición & Acciones de la nota ─── */}
+          <div className="p-4 rounded-2xl bg-nexus-surface border border-nexus-border shadow-lg space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-indigo-400" />
+                <span className="text-xs font-bold uppercase tracking-wider text-nexus-text">
+                  Plantilla de Nota del Día
+                </span>
+              </div>
 
-          {/* Mode Switcher: Blocks vs Markdown */}
-          <div className="flex items-center gap-1 bg-nexus-surface-2 p-1 rounded-xl border border-nexus-border text-xs">
-            <button
-              type="button"
-              onClick={() => {
-                setEditorMode('blocks');
-                if (markdownText) {
-                  const updated = markdownToBlocks(markdownText);
-                  updateNoteContent(updated);
-                }
-              }}
-              className={`px-3 py-1 rounded-lg transition font-medium flex items-center gap-1.5 ${
-                editorMode === 'blocks'
-                  ? 'bg-nexus-surface-3 text-nexus-text font-bold shadow-sm'
-                  : 'text-nexus-text-muted hover:text-nexus-text'
-              }`}
-            >
-              <Layers className="w-3.5 h-3.5 text-indigo-400" />
-              <span>Bloques</span>
-            </button>
+              <div className="flex items-center gap-2 flex-wrap">
+                {/* Mode Switcher: Blocks vs Markdown */}
+                <div className="flex items-center gap-1 bg-nexus-surface-2 p-1 rounded-xl border border-nexus-border text-xs">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditorMode('blocks');
+                      if (markdownText) {
+                        const updated = markdownToBlocks(markdownText);
+                        updateNoteContent(updated);
+                      }
+                    }}
+                    className={`px-3 py-1 rounded-lg transition font-medium flex items-center gap-1.5 cursor-pointer ${
+                      editorMode === 'blocks'
+                        ? 'bg-nexus-surface-3 text-nexus-text font-bold shadow-sm'
+                        : 'text-nexus-text-muted hover:text-nexus-text'
+                    }`}
+                  >
+                    <Layers className="w-3.5 h-3.5 text-indigo-400" />
+                    <span>Bloques</span>
+                  </button>
 
-            <button
-              type="button"
-              onClick={() => {
-                setEditorMode('markdown');
-                setMarkdownText(blocksToMarkdown(activeContent));
-              }}
-              className={`px-3 py-1 rounded-lg transition font-medium flex items-center gap-1.5 ${
-                editorMode === 'markdown'
-                  ? 'bg-nexus-surface-3 text-nexus-text font-bold shadow-sm'
-                  : 'text-nexus-text-muted hover:text-nexus-text'
-              }`}
-            >
-              <FileText className="w-3.5 h-3.5 text-pink-400" />
-              <span>Markdown</span>
-            </button>
-          </div>
-        </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditorMode('markdown');
+                      setMarkdownText(blocksToMarkdown(activeContent));
+                    }}
+                    className={`px-3 py-1 rounded-lg transition font-medium flex items-center gap-1.5 cursor-pointer ${
+                      editorMode === 'markdown'
+                        ? 'bg-nexus-surface-3 text-nexus-text font-bold shadow-sm'
+                        : 'text-nexus-text-muted hover:text-nexus-text'
+                    }`}
+                  >
+                    <FileText className="w-3.5 h-3.5 text-pink-400" />
+                    <span>Markdown</span>
+                  </button>
+                </div>
 
-        {/* Template Buttons */}
-        <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-nexus-border/60">
-          <button
-            type="button"
-            onClick={() => handleApplyTemplate('lifeos')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs font-medium text-nexus-text transition cursor-pointer"
-            title="Estructura general con enfoque, prioridades, agenda y notas"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-            <span>General</span>
-          </button>
+                <button
+                  type="button"
+                  onClick={handleResetToDailyTemplate}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs font-medium text-nexus-text transition cursor-pointer"
+                  title="Restablecer la estructura de la nota del día"
+                >
+                  <RotateCcw className="w-3.5 h-3.5 text-indigo-400" />
+                  <span>Restablecer plantilla</span>
+                </button>
 
-          <button
-            type="button"
-            onClick={() => handleApplyTemplate('minimal')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs font-medium text-nexus-text transition cursor-pointer"
-            title="Objetivo principal y acciones clave"
-          >
-            <Target className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Esencial</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleApplyTemplate('deepwork')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs font-medium text-nexus-text transition cursor-pointer"
-            title="Sprint de trabajo enfocado y bitácora técnica"
-          >
-            <Code className="w-3.5 h-3.5 text-amber-400" />
-            <span>Deep Work</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleApplyTemplate('wellness')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs font-medium text-nexus-text transition cursor-pointer"
-            title="Hábitos, autocuidado y salud"
-          >
-            <Heart className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Bienestar</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleApplyTemplate('finance')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs font-medium text-nexus-text transition cursor-pointer"
-            title="Presupuesto diario, gastos del día y balance"
-          >
-            <DollarSign className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Finanzas</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleApplyTemplate('couple')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs font-medium text-nexus-text transition cursor-pointer"
-            title="Acuerdos, logística y actividades compartidas"
-          >
-            <Share2 className="w-3.5 h-3.5 text-pink-400" />
-            <span>Compartida</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleApplyTemplate('weekly')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs font-medium text-nexus-text transition cursor-pointer"
-            title="Balance semanal y próximos objetivos"
-          >
-            <FolderKanban className="w-3.5 h-3.5 text-purple-400" />
-            <span>Semanal</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleApplyTemplate('clean')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs font-medium text-nexus-text transition cursor-pointer"
-            title="Documento en blanco"
-          >
-            <FileText className="w-3.5 h-3.5 text-slate-400" />
-            <span>En blanco</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleOpenGallery()}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-xs font-bold text-indigo-400 transition cursor-pointer"
-            title="Ver catálogo completo de plantillas y previsualizar"
-          >
-            <Eye className="w-3.5 h-3.5" />
-            <span>Más plantillas...</span>
-          </button>
-
-          {/* Plantillas Personalizadas */}
-          {customTemplates.map(tpl => (
-            <div
-              key={tpl.id}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs font-medium text-nexus-text transition group"
-            >
-              <button
-                type="button"
-                onClick={() => handleApplyCustomTemplate(tpl)}
-                className="flex items-center gap-1.5 cursor-pointer text-left"
-                title={tpl.description || tpl.name}
-              >
-                <span>{tpl.icon || '📝'}</span>
-                <span className="group-hover:text-indigo-400">{tpl.name}</span>
-              </button>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (window.confirm(`¿Eliminar la plantilla "${tpl.name}"?`)) {
-                    deleteCustomTemplate(tpl.id);
-                  }
-                }}
-                className="text-nexus-text-muted hover:text-red-400 p-0.5 rounded opacity-0 group-hover:opacity-100 transition cursor-pointer ml-1"
-                title="Eliminar plantilla"
-              >
-                <X className="w-3 h-3" />
-              </button>
+                <button
+                  type="button"
+                  onClick={handleClearToBlank}
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs text-nexus-text-muted hover:text-nexus-text transition cursor-pointer"
+                  title="Dejar la nota en blanco"
+                >
+                  <FileText className="w-3.5 h-3.5 text-slate-400" />
+                  <span>En blanco</span>
+                </button>
+              </div>
             </div>
-          ))}
-
-          {/* Botones para crear y guardar plantilla */}
-          <button
-            type="button"
-            onClick={() => {
-              setTemplateInitialMarkdown('');
-              setIsCreateTemplateOpen(true);
-            }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-xs font-medium text-indigo-400 hover:text-indigo-300 transition cursor-pointer"
-            title="Diseñar una nueva plantilla personalizada"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Nueva Plantilla</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setTemplateInitialMarkdown(blocksToMarkdown(activeContent));
-              setIsCreateTemplateOpen(true);
-            }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs font-medium text-nexus-text-secondary hover:text-nexus-text transition cursor-pointer"
-            title="Guardar el contenido actual como una plantilla reutilizable"
-          >
-            <Save className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Guardar como Plantilla</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleApplyTemplate('clean')}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-nexus-surface-2 hover:bg-nexus-surface-3 border border-nexus-border text-xs text-nexus-text-muted hover:text-nexus-text transition cursor-pointer ml-auto"
-            title="Reiniciar a hoja en blanco"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Limpiar</span>
-          </button>
-        </div>
 
         {/* Task Completion Progress Bar */}
         {todoBlocks.length > 0 && (
@@ -1870,26 +1442,6 @@ export default function DailyNoteView() {
       </div>
     </>
   )}
-
-      {/* ─── Modal de Crear / Guardar Plantilla Personalizada ─── */}
-      <CreateTemplateModal
-        isOpen={isCreateTemplateOpen}
-        onClose={() => setIsCreateTemplateOpen(false)}
-        initialMarkdown={templateInitialMarkdown}
-        onSaveSuccess={() => {
-          setIsCreateTemplateOpen(false);
-        }}
-      />
-
-      {/* ─── Modal de Explorar y Previsualizar Plantillas ─── */}
-      <TemplateGalleryModal
-        isOpen={isGalleryOpen}
-        onClose={() => setIsGalleryOpen(false)}
-        onSelectTemplate={handleSelectTemplateFromGallery}
-        initialTemplateId={previewTemplateId}
-        title="Explorador & Vista Previa de Plantillas"
-        confirmButtonText={note ? 'Aplicar a esta nota' : 'Crear nota con esta plantilla'}
-      />
     </div>
   );
 }
