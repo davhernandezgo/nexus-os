@@ -65,8 +65,7 @@ Abre tu navegador en `http://localhost:5173`.
 
 ### 3. Cuentas de Prueba Pre-configuradas (PIN Local)
 Al iniciar la aplicación, selecciona una de las cuentas con aislamiento de privacidad:
-- **David** (👨‍💻 Tech & Cloud Lead): PIN `1234`
-- **Cami** (👩‍🎨 Creative & Wellness): PIN `5678`
+
 
 ---
 
