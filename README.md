@@ -39,9 +39,9 @@ NexusOS está diseñado con una arquitectura **Offline-First**, **Privacidad Cri
    - **Grafo de Conocimiento 2D Interactivo** con simulación de fuerzas físicas en tiempo real, zoom, arrastre y filtros por visibilidad y tipo.
 
 4. **El Plus Exclusivo — Hub de Pareja (`💑 Couple Space`)**:
-   - **Bóveda 100% Privada**: David ve sus microservicios Go, AWS y ContaCripto. Cami ve sus proyectos laborales y bienestar. Ninguno tiene acceso a lo privado del otro.
-   - **Espacio de Pareja Compartido**: Tareas del apartamento, compras y proyectos del hogar.
-   - **Control de Gastos y Split 50/50**: Registro de pagos, visualización de aportes y cálculo automático de saldos pendientes en pesos colombianos (COP).
+   - **Bóveda 100% Privada**: Cada usuario mantiene su bóveda personal completamente aislada (proyectos, notas, tareas privadas). Ninguno tiene acceso a lo privado del otro.
+   - **Espacio de Pareja Compartido**: Tareas conjuntas, compras y proyectos del hogar en tiempo real.
+   - **Control de Gastos y Split 50/50**: Registro de pagos, visualización de aportes y cálculo automático de balances.
    - **Planificador de Viajes**: Cuenta regresiva en vivo, presupuesto e itinerario/checklist.
    - **Pizarra Rápida Sincronizada**: Notas y acuerdos de convivencia colaborativos.
 
@@ -53,6 +53,7 @@ NexusOS funciona inmediatamente en modo local sin requerir servicios externos ni
 
 ### 1. Clonar e Instalar Dependencias
 ```bash
+git clone https://github.com/davhernandezgo/nexus-os.git
 cd nexus-os
 npm install
 ```
@@ -63,9 +64,8 @@ npm run dev
 ```
 Abre tu navegador en `http://localhost:5173`.
 
-### 3. Cuentas de Prueba Pre-configuradas (PIN Local)
-Al iniciar la aplicación, selecciona una de las cuentas con aislamiento de privacidad:
-
+### 3. Autenticación y Cuentas
+Puedes iniciar sesión directamente creando tu cuenta con correo electrónico o autenticación con Google (vía Supabase Auth), o utilizar el entorno local-first para comenzar de inmediato.
 
 ---
 
@@ -113,7 +113,7 @@ Si deseas sincronización en la nube entre múltiples dispositivos y WebSockets 
 3. Abre el archivo local `supabase/schema.sql`, copia todo su contenido y pégalo en el editor.
 4. Presiona **Run**. Esto creará:
    - Todas las tablas (`tasks`, `habits`, `expenses`, `trip_plans`, `shared_notes`, `daily_notes`, `notifications`).
-   - Políticas de seguridad **Row Level Security (RLS)** que garantizan a nivel de base de datos que Cami nunca pueda leer datos privados de David y viceversa.
+   - Políticas de seguridad **Row Level Security (RLS)** que garantizan a nivel de base de datos el aislamiento estricto entre cuentas y privacidad de cada usuario.
    - Publicaciones para **Supabase Realtime WebSockets**.
 5. Copia tus credenciales de Supabase (Project URL y `anon` public key) en un archivo `.env`:
    ```env
@@ -136,6 +136,12 @@ Si deseas sincronización en la nube entre múltiples dispositivos y WebSockets 
 
 - `Cmd + K` o `Ctrl + K`: Abre la Paleta de Comandos universal (búsqueda de tareas, navegación rápida, inicio de cronómetro y hábitos).
 - `Enter` en Quick-Add: Guarda y parsea automáticamente una nueva tarea con NLP.
+
+---
+
+## 📄 Licencia
+
+Este proyecto está bajo la Licencia **MIT**. Consulta el archivo [LICENSE](LICENSE) para más detalles.
 
 ---
 
